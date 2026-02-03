@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Header } from "./Header";
 import { SteeringWheel } from "./SteeringWheel";
 import { CarTelemetry } from "./CarTelemetry";
@@ -10,6 +10,7 @@ interface ControlState {
   throttle: boolean;
   brake: boolean;
   gear: string;
+  speed: number;
 }
 
 export const CockpitController = () => {
@@ -18,46 +19,113 @@ export const CockpitController = () => {
     throttle: false,
     brake: false,
     gear: "N",
+    speed: 0,
   });
+  const [isConnected, setIsConnected] = useState(false);
+  const [serverIp, setServerIp] = useState("");
+  const speedIntervalRef = useRef<number | null>(null);
+
+  // Simulate speed based on throttle/brake/gear
+  useEffect(() => {
+    if (speedIntervalRef.current) {
+      clearInterval(speedIntervalRef.current);
+    }
+
+    speedIntervalRef.current = window.setInterval(() => {
+      setControlState(prev => {
+        let newSpeed = prev.speed;
+        const gearMultiplier = {
+          'R': -0.3,
+          'N': 0,
+          '1': 0.5,
+          '2': 0.7,
+          '3': 0.9,
+          'S': 1.2,
+        }[prev.gear] || 0;
+
+        if (prev.throttle && !prev.brake && prev.gear !== 'N') {
+          newSpeed = Math.min(100, prev.speed + (2 * gearMultiplier));
+        } else if (prev.brake) {
+          newSpeed = Math.max(0, prev.speed - 5);
+        } else {
+          // Natural deceleration
+          newSpeed = Math.max(0, prev.speed - 0.5);
+        }
+
+        return { ...prev, speed: Math.max(0, newSpeed) };
+      });
+    }, 100);
+
+    return () => {
+      if (speedIntervalRef.current) {
+        clearInterval(speedIntervalRef.current);
+      }
+    };
+  }, []);
+
+  const sendCommand = useCallback((command: string, value: unknown) => {
+    if (!isConnected || !serverIp) return;
+    
+    // TODO: Replace with actual fetch to Flask
+    console.log(`[${serverIp}] ${command}:`, value);
+    
+    // Example fetch (uncomment when backend is ready):
+    // fetch(`http://${serverIp}/control`, {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ command, value })
+    // }).catch(console.error);
+  }, [isConnected, serverIp]);
+
+  const handleConnect = useCallback((ip: string) => {
+    setServerIp(ip);
+    setIsConnected(true);
+    console.log("Connected to:", ip);
+  }, []);
+
+  const handleDisconnect = useCallback(() => {
+    setIsConnected(false);
+    setServerIp("");
+    setControlState(prev => ({ ...prev, speed: 0, throttle: false, brake: false, gear: 'N' }));
+    console.log("Disconnected");
+  }, []);
 
   const handleAngleChange = useCallback((angle: number) => {
     setControlState(prev => ({ ...prev, steeringAngle: angle }));
-    // TODO: Send to Flask backend
-    console.log("Steering:", Math.round(angle));
-  }, []);
+    sendCommand("steering", Math.round(angle));
+  }, [sendCommand]);
 
   const handleThrottleChange = useCallback((active: boolean) => {
     setControlState(prev => ({ ...prev, throttle: active }));
-    // TODO: Send to Flask backend
-    console.log("Throttle:", active ? "ON" : "OFF");
-  }, []);
+    sendCommand("throttle", active);
+  }, [sendCommand]);
 
   const handleBrakeChange = useCallback((active: boolean) => {
     setControlState(prev => ({ ...prev, brake: active }));
-    // TODO: Send to Flask backend
-    console.log("Brake:", active ? "ON" : "OFF");
-  }, []);
+    sendCommand("brake", active);
+  }, [sendCommand]);
 
   const handleGearChange = useCallback((gear: string) => {
     setControlState(prev => ({ ...prev, gear }));
-    // TODO: Send to Flask backend
-    console.log("Gear:", gear);
-  }, []);
+    sendCommand("gear", gear);
+  }, [sendCommand]);
 
   const handleLaunch = useCallback(() => {
-    // TODO: Send launch command to Flask backend
-    console.log("LAUNCH MODE ACTIVATED");
-  }, []);
+    sendCommand("action", "launch");
+  }, [sendCommand]);
 
   const handleDonut = useCallback(() => {
-    // TODO: Send donut command to Flask backend
-    console.log("DONUT MODE ACTIVATED");
-  }, []);
+    sendCommand("action", "donut");
+  }, [sendCommand]);
 
   return (
     <div className="h-full w-full flex flex-col overflow-hidden">
       {/* Header */}
-      <Header />
+      <Header 
+        isConnected={isConnected}
+        onConnect={handleConnect}
+        onDisconnect={handleDisconnect}
+      />
       
       {/* Main Content */}
       <div className="flex-1 flex min-h-0">
@@ -76,6 +144,7 @@ export const CockpitController = () => {
             throttle={controlState.throttle}
             brake={controlState.brake}
             gear={controlState.gear}
+            speed={controlState.speed}
             onLaunch={handleLaunch}
             onDonut={handleDonut}
           />

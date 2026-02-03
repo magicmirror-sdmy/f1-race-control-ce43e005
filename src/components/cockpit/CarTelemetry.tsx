@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { Rocket, RotateCcw } from "lucide-react";
+import { Speedometer } from "./Speedometer";
 
 interface CarTelemetryProps {
   steeringAngle: number;
   throttle: boolean;
   brake: boolean;
   gear: string;
+  speed: number;
   onLaunch: () => void;
   onDonut: () => void;
 }
@@ -14,6 +17,7 @@ export const CarTelemetry = ({
   throttle,
   brake,
   gear,
+  speed,
   onLaunch,
   onDonut,
 }: CarTelemetryProps) => {
@@ -37,9 +41,10 @@ export const CarTelemetry = ({
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-2">
-      <div className="racing-text text-xs text-muted-foreground mb-2">TELEMETRY</div>
+      {/* Speedometer at top */}
+      <Speedometer speed={speed} maxSpeed={100} />
       
-      <div className="relative w-32 sm:w-40">
+      <div className="relative w-28 sm:w-36 mt-2">
         {/* Car Body - Top Down View */}
         <svg viewBox="0 0 100 160" className="w-full h-auto">
           {/* Car Shadow */}
@@ -141,42 +146,42 @@ export const CarTelemetry = ({
           <line x1="70" y1="45" x2="70" y2="130" stroke="hsl(var(--primary))" strokeWidth="1" opacity="0.6" />
         </svg>
         
-        {/* Action Buttons */}
-        <div className="absolute -left-12 top-1/2 -translate-y-1/2 flex flex-col gap-2">
-          <button
-            onClick={handleLaunch}
-            className={`
-              w-10 h-10 rounded border text-[10px] font-bold racing-text
-              transition-all duration-100 touch-feedback
-              ${launchActive 
-                ? 'bg-primary border-primary text-primary-foreground glow-teal' 
-                : 'bg-card border-primary/50 text-primary hover:bg-primary/20'
-              }
-            `}
-          >
-            LAUNCH
-          </button>
-        </div>
+        {/* Round Action Buttons */}
+        <button
+          onClick={handleLaunch}
+          className={`
+            absolute -left-10 top-1/2 -translate-y-1/2
+            w-12 h-12 rounded-full border-2 flex flex-col items-center justify-center
+            transition-all duration-100 touch-feedback
+            ${launchActive 
+              ? 'bg-primary border-primary text-primary-foreground glow-teal scale-95' 
+              : 'bg-card border-primary/50 text-primary hover:bg-primary/20'
+            }
+          `}
+        >
+          <Rocket className="w-4 h-4 mb-0.5" />
+          <span className="text-[7px] font-bold racing-text leading-none">LAUNCH</span>
+        </button>
         
-        <div className="absolute -right-12 top-1/2 -translate-y-1/2 flex flex-col gap-2">
-          <button
-            onClick={handleDonut}
-            className={`
-              w-10 h-10 rounded border text-[10px] font-bold racing-text
-              transition-all duration-100 touch-feedback
-              ${donutActive 
-                ? 'bg-accent border-accent text-accent-foreground glow-accent' 
-                : 'bg-card border-accent/50 text-accent hover:bg-accent/20'
-              }
-            `}
-          >
-            DONUT
-          </button>
-        </div>
+        <button
+          onClick={handleDonut}
+          className={`
+            absolute -right-10 top-1/2 -translate-y-1/2
+            w-12 h-12 rounded-full border-2 flex flex-col items-center justify-center
+            transition-all duration-100 touch-feedback
+            ${donutActive 
+              ? 'bg-accent border-accent text-accent-foreground glow-accent scale-95' 
+              : 'bg-card border-accent/50 text-accent hover:bg-accent/20'
+            }
+          `}
+        >
+          <RotateCcw className="w-4 h-4 mb-0.5" />
+          <span className="text-[7px] font-bold racing-text leading-none">DONUT</span>
+        </button>
       </div>
       
       {/* Status Indicators */}
-      <div className="flex gap-4 mt-3 text-[10px] racing-text">
+      <div className="flex gap-4 mt-2 text-[10px] racing-text">
         <div className={`flex items-center gap-1 ${throttle ? 'text-primary text-glow-teal' : 'text-muted-foreground'}`}>
           <div className={`w-2 h-2 rounded-full ${throttle ? 'bg-primary' : 'bg-muted'}`} />
           PWR
@@ -184,10 +189,6 @@ export const CarTelemetry = ({
         <div className={`flex items-center gap-1 ${brake ? 'text-destructive text-glow-red' : 'text-muted-foreground'}`}>
           <div className={`w-2 h-2 rounded-full ${brake ? 'bg-destructive' : 'bg-muted'}`} />
           BRK
-        </div>
-        <div className="flex items-center gap-1 text-muted-foreground">
-          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          CONN
         </div>
       </div>
     </div>
