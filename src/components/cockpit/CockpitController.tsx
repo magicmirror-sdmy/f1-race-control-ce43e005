@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Header } from "./Header";
 import { SteeringWheel } from "./SteeringWheel";
+import { CameraFeed } from "./CameraFeed";
 import { CarTelemetry } from "./CarTelemetry";
 import { GearShifter } from "./GearShifter";
 import { Pedals } from "./Pedals";
@@ -129,12 +130,20 @@ export const CockpitController = () => {
       
       {/* Main Content */}
       <div className="flex-1 flex min-h-0">
-        {/* Left Zone: Steering Wheel */}
-        <div className="flex-[0.35] border-r border-border/30 racing-panel m-0.5 sm:m-1 sm:mr-0.5">
-          <SteeringWheel 
-            angle={controlState.steeringAngle} 
-            onAngleChange={handleAngleChange} 
-          />
+        {/* Left Zone: Camera Feed + Steering Wheel */}
+        <div className="flex-[0.35] border-r border-border/30 racing-panel m-0.5 sm:m-1 sm:mr-0.5 flex flex-col">
+          {/* Camera Feed - Top */}
+          <div className="h-[35%] p-1 sm:p-1.5 border-b border-border/30">
+            <CameraFeed isConnected={isConnected} />
+          </div>
+          
+          {/* Steering Wheel - Bottom */}
+          <div className="flex-1">
+            <SteeringWheel 
+              angle={controlState.steeringAngle} 
+              onAngleChange={handleAngleChange} 
+            />
+          </div>
         </div>
         
         {/* Center Zone: Car Telemetry */}

@@ -51,12 +51,10 @@ export const SteeringWheel = ({ onAngleChange, angle }: SteeringWheelProps) => {
   }, [onAngleChange]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-full p-1 sm:p-2">
-      <div className="racing-text text-[10px] sm:text-xs text-muted-foreground mb-1 sm:mb-2">STEERING</div>
-      
+    <div className="flex flex-col items-center justify-end h-full p-1 sm:p-2 pb-2 sm:pb-4">
       <div
         ref={wheelRef}
-        className="relative cursor-grab active:cursor-grabbing touch-none select-none w-full max-w-[min(35vw,12rem)] aspect-[5/4]"
+        className="relative cursor-grab active:cursor-grabbing touch-none select-none w-full max-w-[min(32vw,11rem)] aspect-[5/4]"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -131,7 +129,7 @@ export const SteeringWheel = ({ onAngleChange, angle }: SteeringWheelProps) => {
       </div>
       
       {/* Instructions */}
-      <div className="text-[8px] sm:text-[10px] text-muted-foreground mt-1 sm:mt-2 racing-text">
+      <div className="text-[7px] sm:text-[9px] text-muted-foreground mt-1 racing-text">
         DRAG TO STEER
       </div>
     </div>
