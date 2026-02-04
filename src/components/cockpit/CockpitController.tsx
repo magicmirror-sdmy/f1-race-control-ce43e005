@@ -130,7 +130,7 @@ export const CockpitController = () => {
       {/* Main Content */}
       <div className="flex-1 flex min-h-0">
         {/* Left Zone: Steering Wheel */}
-        <div className="flex-[0.35] border-r border-border/30 racing-panel m-1 mr-0.5">
+        <div className="flex-[0.35] border-r border-border/30 racing-panel m-0.5 sm:m-1 sm:mr-0.5">
           <SteeringWheel 
             angle={controlState.steeringAngle} 
             onAngleChange={handleAngleChange} 
@@ -138,7 +138,7 @@ export const CockpitController = () => {
         </div>
         
         {/* Center Zone: Car Telemetry */}
-        <div className="flex-[0.4] racing-panel m-1 mx-0.5">
+        <div className="flex-[0.4] racing-panel m-0.5 sm:m-1 sm:mx-0.5">
           <CarTelemetry 
             steeringAngle={controlState.steeringAngle}
             throttle={controlState.throttle}
@@ -151,7 +151,7 @@ export const CockpitController = () => {
         </div>
         
         {/* Right Zone: Gear Shifter */}
-        <div className="flex-[0.25] border-l border-border/30 racing-panel m-1 ml-0.5">
+        <div className="flex-[0.25] border-l border-border/30 racing-panel m-0.5 sm:m-1 sm:ml-0.5">
           <GearShifter 
             currentGear={controlState.gear} 
             onGearChange={handleGearChange} 
@@ -160,7 +160,7 @@ export const CockpitController = () => {
       </div>
       
       {/* Footer Zone: Pedals */}
-      <div className="h-24 sm:h-28 border-t border-primary/30">
+      <div className="h-[15vh] min-h-16 max-h-28 border-t border-primary/30">
         <Pedals 
           onThrottleChange={handleThrottleChange}
           onBrakeChange={handleBrakeChange}

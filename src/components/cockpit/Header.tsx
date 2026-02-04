@@ -16,39 +16,39 @@ export const Header = ({
   onDisconnect
 }: HeaderProps) => {
   return (
-    <header className="flex items-center justify-between px-4 py-2 border-b border-primary/30 bg-card/30 backdrop-blur-sm">
+    <header className="flex items-center justify-between px-2 sm:px-4 py-1 sm:py-2 border-b border-primary/30 bg-card/30 backdrop-blur-sm min-h-[2.5rem]">
       {/* Left: Team Logo */}
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center gap-0.5 sm:gap-1">
           {/* AMG Stripes */}
           <div className="flex gap-0.5">
             {[...Array(5)].map((_, i) => (
               <div 
                 key={i} 
-                className="w-1 h-5 bg-gradient-to-b from-muted-foreground to-muted transform -skew-x-12"
+                className="w-0.5 sm:w-1 h-3 sm:h-5 bg-gradient-to-b from-muted-foreground to-muted transform -skew-x-12"
               />
             ))}
           </div>
-          <span className="text-foreground font-bold tracking-wider ml-1">AMG</span>
+          <span className="text-foreground font-bold tracking-wider ml-0.5 sm:ml-1 text-xs sm:text-base">AMG</span>
         </div>
-        <span className="text-primary font-bold racing-text">PETRONAS</span>
+        <span className="text-primary font-bold racing-text text-xs sm:text-base">PETRONAS</span>
       </div>
       
       {/* Center: Connection Status */}
-      <div className="flex items-center gap-2 text-xs racing-text text-muted-foreground">
-        <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-primary animate-pulse' : 'bg-destructive'}`} />
+      <div className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs racing-text text-muted-foreground">
+        <div className={`w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full ${isConnected ? 'bg-primary animate-pulse' : 'bg-destructive'}`} />
         <span className="hidden sm:inline">{isConnected ? 'CONNECTED' : 'OFFLINE'}</span>
       </div>
       
       {/* Right: Driver Status + Connection */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-primary font-bold text-lg racing-text">{position}</span>
-          <span className="text-foreground font-bold racing-text hidden sm:inline">{driverName}</span>
+      <div className="flex items-center gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-1 sm:gap-2">
+          <span className="text-primary font-bold text-sm sm:text-lg racing-text">{position}</span>
+          <span className="text-foreground font-bold racing-text text-xs sm:text-base hidden sm:inline">{driverName}</span>
         </div>
         {/* Driver Number Badge */}
-        <div className="w-7 h-7 bg-primary rounded flex items-center justify-center">
-          <span className="text-primary-foreground font-bold text-sm">44</span>
+        <div className="w-5 h-5 sm:w-7 sm:h-7 bg-primary rounded flex items-center justify-center">
+          <span className="text-primary-foreground font-bold text-xs sm:text-sm">44</span>
         </div>
         {/* Connection Dialog */}
         <ConnectionDialog

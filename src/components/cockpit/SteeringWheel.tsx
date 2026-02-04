@@ -51,12 +51,12 @@ export const SteeringWheel = ({ onAngleChange, angle }: SteeringWheelProps) => {
   }, [onAngleChange]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-full p-2">
-      <div className="racing-text text-xs text-muted-foreground mb-2">STEERING</div>
+    <div className="flex flex-col items-center justify-center h-full p-1 sm:p-2">
+      <div className="racing-text text-[10px] sm:text-xs text-muted-foreground mb-1 sm:mb-2">STEERING</div>
       
       <div
         ref={wheelRef}
-        className="relative cursor-grab active:cursor-grabbing touch-none select-none"
+        className="relative cursor-grab active:cursor-grabbing touch-none select-none w-full max-w-[min(35vw,12rem)] aspect-[5/4]"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -88,42 +88,42 @@ export const SteeringWheel = ({ onAngleChange, angle }: SteeringWheelProps) => {
       >
         {/* Steering Wheel Container */}
         <div
-          className="steering-wheel relative"
+          className="steering-wheel relative w-full h-full"
           style={{ transform: `rotate(${angle}deg)` }}
         >
           {/* Outer Ring */}
-          <div className="w-40 h-32 sm:w-48 sm:h-36 relative">
+          <div className="w-full h-full relative">
             {/* Top Section */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 sm:w-32 h-4 bg-gradient-to-b from-muted to-card rounded-t-full border-t border-l border-r border-primary/30" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[70%] h-[12%] bg-gradient-to-b from-muted to-card rounded-t-full border-t border-l border-r border-primary/30" />
             
             {/* Left Grip */}
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-6 h-20 sm:h-24 carbon-fiber rounded-l-full border border-primary/20">
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[15%] h-[65%] carbon-fiber rounded-l-full border border-primary/20">
               <div className="absolute inset-1 bg-gradient-to-r from-muted-foreground/20 to-transparent rounded-l-full" />
             </div>
             
             {/* Right Grip */}
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-20 sm:h-24 carbon-fiber rounded-r-full border border-primary/20">
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[15%] h-[65%] carbon-fiber rounded-r-full border border-primary/20">
               <div className="absolute inset-1 bg-gradient-to-l from-muted-foreground/20 to-transparent rounded-r-full" />
             </div>
             
             {/* Bottom Section */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 sm:w-28 h-3 bg-gradient-to-t from-muted to-card rounded-b-lg border-b border-l border-r border-primary/30" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60%] h-[10%] bg-gradient-to-t from-muted to-card rounded-b-lg border-b border-l border-r border-primary/30" />
             
             {/* Center Display */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-16 sm:w-24 sm:h-18 racing-panel flex flex-col items-center justify-center">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[55%] h-[55%] racing-panel flex flex-col items-center justify-center">
               {/* AMG Logo */}
-              <div className="text-[8px] text-primary racing-text mb-1">AMG</div>
+              <div className="text-[6px] sm:text-[8px] text-primary racing-text mb-0.5">AMG</div>
               
               {/* Angle Display */}
-              <div className={`text-2xl sm:text-3xl racing-number ${isDragging ? 'text-primary text-glow-teal' : 'text-foreground'}`}>
+              <div className={`text-lg sm:text-2xl md:text-3xl racing-number ${isDragging ? 'text-primary text-glow-teal' : 'text-foreground'}`}>
                 {Math.round(angle)}°
               </div>
               
               {/* Direction Indicator */}
-              <div className="flex gap-2 mt-1">
-                <div className={`w-2 h-1 rounded-full transition-colors ${angle < -10 ? 'bg-primary glow-teal' : 'bg-muted'}`} />
-                <div className={`w-2 h-1 rounded-full transition-colors ${Math.abs(angle) <= 10 ? 'bg-primary' : 'bg-muted'}`} />
-                <div className={`w-2 h-1 rounded-full transition-colors ${angle > 10 ? 'bg-primary glow-teal' : 'bg-muted'}`} />
+              <div className="flex gap-1 sm:gap-2 mt-0.5 sm:mt-1">
+                <div className={`w-1.5 sm:w-2 h-0.5 sm:h-1 rounded-full transition-colors ${angle < -10 ? 'bg-primary glow-teal' : 'bg-muted'}`} />
+                <div className={`w-1.5 sm:w-2 h-0.5 sm:h-1 rounded-full transition-colors ${Math.abs(angle) <= 10 ? 'bg-primary' : 'bg-muted'}`} />
+                <div className={`w-1.5 sm:w-2 h-0.5 sm:h-1 rounded-full transition-colors ${angle > 10 ? 'bg-primary glow-teal' : 'bg-muted'}`} />
               </div>
             </div>
           </div>
@@ -131,7 +131,7 @@ export const SteeringWheel = ({ onAngleChange, angle }: SteeringWheelProps) => {
       </div>
       
       {/* Instructions */}
-      <div className="text-[10px] text-muted-foreground mt-2 racing-text">
+      <div className="text-[8px] sm:text-[10px] text-muted-foreground mt-1 sm:mt-2 racing-text">
         DRAG TO STEER
       </div>
     </div>
