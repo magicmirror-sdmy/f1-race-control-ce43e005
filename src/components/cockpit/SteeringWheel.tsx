@@ -51,10 +51,10 @@ export const SteeringWheel = ({ onAngleChange, angle }: SteeringWheelProps) => {
   }, [onAngleChange]);
 
   return (
-    <div className="flex flex-col items-center justify-end h-full p-1 sm:p-2 pb-2 sm:pb-4">
+    <div className="flex flex-col items-center justify-center h-full p-0.5 overflow-hidden">
       <div
         ref={wheelRef}
-        className="relative cursor-grab active:cursor-grabbing touch-none select-none w-full max-w-[min(32vw,11rem)] aspect-[5/4]"
+        className="relative cursor-grab active:cursor-grabbing touch-none select-none w-[min(28vw,10rem)] aspect-[5/4]"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -110,18 +110,18 @@ export const SteeringWheel = ({ onAngleChange, angle }: SteeringWheelProps) => {
             {/* Center Display */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[55%] h-[55%] racing-panel flex flex-col items-center justify-center">
               {/* AMG Logo */}
-              <div className="text-[6px] sm:text-[8px] text-primary racing-text mb-0.5">AMG</div>
+              <div className="text-[5px] sm:text-[7px] text-primary racing-text">AMG</div>
               
               {/* Angle Display */}
-              <div className={`text-lg sm:text-2xl md:text-3xl racing-number ${isDragging ? 'text-primary text-glow-teal' : 'text-foreground'}`}>
+              <div className={`text-base sm:text-xl md:text-2xl racing-number ${isDragging ? 'text-primary text-glow-teal' : 'text-foreground'}`}>
                 {Math.round(angle)}°
               </div>
               
               {/* Direction Indicator */}
-              <div className="flex gap-1 sm:gap-2 mt-0.5 sm:mt-1">
-                <div className={`w-1.5 sm:w-2 h-0.5 sm:h-1 rounded-full transition-colors ${angle < -10 ? 'bg-primary glow-teal' : 'bg-muted'}`} />
-                <div className={`w-1.5 sm:w-2 h-0.5 sm:h-1 rounded-full transition-colors ${Math.abs(angle) <= 10 ? 'bg-primary' : 'bg-muted'}`} />
-                <div className={`w-1.5 sm:w-2 h-0.5 sm:h-1 rounded-full transition-colors ${angle > 10 ? 'bg-primary glow-teal' : 'bg-muted'}`} />
+              <div className="flex gap-1 mt-0.5">
+                <div className={`w-1 sm:w-1.5 h-0.5 rounded-full transition-colors ${angle < -10 ? 'bg-primary glow-teal' : 'bg-muted'}`} />
+                <div className={`w-1 sm:w-1.5 h-0.5 rounded-full transition-colors ${Math.abs(angle) <= 10 ? 'bg-primary' : 'bg-muted'}`} />
+                <div className={`w-1 sm:w-1.5 h-0.5 rounded-full transition-colors ${angle > 10 ? 'bg-primary glow-teal' : 'bg-muted'}`} />
               </div>
             </div>
           </div>
@@ -129,7 +129,7 @@ export const SteeringWheel = ({ onAngleChange, angle }: SteeringWheelProps) => {
       </div>
       
       {/* Instructions */}
-      <div className="text-[7px] sm:text-[9px] text-muted-foreground mt-1 racing-text">
+      <div className="text-[6px] sm:text-[8px] text-muted-foreground mt-0.5 racing-text">
         DRAG TO STEER
       </div>
     </div>

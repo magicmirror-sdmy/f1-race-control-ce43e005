@@ -40,11 +40,11 @@ export const CarTelemetry = ({
   const frontWheelAngle = steeringAngle * 0.4;
 
   return (
-    <div className="flex flex-col items-center justify-center h-full p-1 sm:p-2">
+    <div className="flex flex-col items-center justify-center h-full p-0.5 overflow-hidden">
       {/* Speedometer at top */}
       <Speedometer speed={speed} maxSpeed={100} />
       
-      <div className="relative w-[min(25vw,9rem)] mt-1 sm:mt-2">
+      <div className="relative w-[min(22vw,8rem)] mt-0.5">
         {/* Car Body - Top Down View */}
         <svg viewBox="0 0 100 160" className="w-full h-auto">
           {/* Car Shadow */}
@@ -150,8 +150,8 @@ export const CarTelemetry = ({
         <button
           onClick={handleLaunch}
           className={`
-            absolute -left-[3vw] sm:-left-10 top-1/2 -translate-y-1/2
-            w-[10vw] h-[10vw] max-w-12 max-h-12 rounded-full border-2 flex flex-col items-center justify-center
+            absolute -left-[2.5vw] sm:-left-8 top-1/2 -translate-y-1/2
+            w-[8vw] h-[8vw] max-w-10 max-h-10 rounded-full border-2 flex flex-col items-center justify-center
             transition-all duration-100 touch-feedback
             ${launchActive 
               ? 'bg-primary border-primary text-primary-foreground glow-teal scale-95' 
@@ -159,15 +159,15 @@ export const CarTelemetry = ({
             }
           `}
         >
-          <Rocket className="w-3 h-3 sm:w-4 sm:h-4" />
-          <span className="text-[5px] sm:text-[7px] font-bold racing-text leading-none mt-0.5">LAUNCH</span>
+          <Rocket className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+          <span className="text-[4px] sm:text-[6px] font-bold racing-text leading-none">LAUNCH</span>
         </button>
         
         <button
           onClick={handleDonut}
           className={`
-            absolute -right-[3vw] sm:-right-10 top-1/2 -translate-y-1/2
-            w-[10vw] h-[10vw] max-w-12 max-h-12 rounded-full border-2 flex flex-col items-center justify-center
+            absolute -right-[2.5vw] sm:-right-8 top-1/2 -translate-y-1/2
+            w-[8vw] h-[8vw] max-w-10 max-h-10 rounded-full border-2 flex flex-col items-center justify-center
             transition-all duration-100 touch-feedback
             ${donutActive 
               ? 'bg-accent border-accent text-accent-foreground glow-accent scale-95' 
@@ -175,19 +175,19 @@ export const CarTelemetry = ({
             }
           `}
         >
-          <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4" />
-          <span className="text-[5px] sm:text-[7px] font-bold racing-text leading-none mt-0.5">DONUT</span>
+          <RotateCcw className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+          <span className="text-[4px] sm:text-[6px] font-bold racing-text leading-none">DONUT</span>
         </button>
       </div>
       
       {/* Status Indicators */}
-      <div className="flex gap-2 sm:gap-4 mt-1 sm:mt-2 text-[8px] sm:text-[10px] racing-text">
-        <div className={`flex items-center gap-0.5 sm:gap-1 ${throttle ? 'text-primary text-glow-teal' : 'text-muted-foreground'}`}>
-          <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${throttle ? 'bg-primary' : 'bg-muted'}`} />
+      <div className="flex gap-2 mt-0.5 text-[6px] sm:text-[8px] racing-text">
+        <div className={`flex items-center gap-0.5 ${throttle ? 'text-primary text-glow-teal' : 'text-muted-foreground'}`}>
+          <div className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${throttle ? 'bg-primary' : 'bg-muted'}`} />
           PWR
         </div>
-        <div className={`flex items-center gap-0.5 sm:gap-1 ${brake ? 'text-destructive text-glow-red' : 'text-muted-foreground'}`}>
-          <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${brake ? 'bg-destructive' : 'bg-muted'}`} />
+        <div className={`flex items-center gap-0.5 ${brake ? 'text-destructive text-glow-red' : 'text-muted-foreground'}`}>
+          <div className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${brake ? 'bg-destructive' : 'bg-muted'}`} />
           BRK
         </div>
       </div>

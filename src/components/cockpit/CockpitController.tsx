@@ -120,7 +120,7 @@ export const CockpitController = () => {
   }, [sendCommand]);
 
   return (
-    <div className="h-full w-full flex flex-col overflow-hidden">
+    <div className="h-[100dvh] w-full flex flex-col overflow-hidden">
       {/* Header */}
       <Header 
         isConnected={isConnected}
@@ -129,16 +129,16 @@ export const CockpitController = () => {
       />
       
       {/* Main Content */}
-      <div className="flex-1 flex min-h-0">
+      <div className="flex-1 flex min-h-0 overflow-hidden">
         {/* Left Zone: Camera Feed + Steering Wheel */}
-        <div className="flex-[0.35] border-r border-border/30 racing-panel m-0.5 sm:m-1 sm:mr-0.5 flex flex-col">
+        <div className="flex-[0.35] border-r border-border/30 racing-panel m-0.5 flex flex-col overflow-hidden">
           {/* Camera Feed - Top */}
-          <div className="h-[35%] p-1 sm:p-1.5 border-b border-border/30">
+          <div className="h-[30%] min-h-[4rem] p-0.5 border-b border-border/30">
             <CameraFeed isConnected={isConnected} />
           </div>
           
           {/* Steering Wheel - Bottom */}
-          <div className="flex-1">
+          <div className="flex-1 min-h-0 overflow-hidden">
             <SteeringWheel 
               angle={controlState.steeringAngle} 
               onAngleChange={handleAngleChange} 
@@ -147,7 +147,7 @@ export const CockpitController = () => {
         </div>
         
         {/* Center Zone: Car Telemetry */}
-        <div className="flex-[0.4] racing-panel m-0.5 sm:m-1 sm:mx-0.5">
+        <div className="flex-[0.4] racing-panel m-0.5 overflow-hidden">
           <CarTelemetry 
             steeringAngle={controlState.steeringAngle}
             throttle={controlState.throttle}
@@ -160,7 +160,7 @@ export const CockpitController = () => {
         </div>
         
         {/* Right Zone: Gear Shifter */}
-        <div className="flex-[0.25] border-l border-border/30 racing-panel m-0.5 sm:m-1 sm:ml-0.5">
+        <div className="flex-[0.25] border-l border-border/30 racing-panel m-0.5 overflow-hidden">
           <GearShifter 
             currentGear={controlState.gear} 
             onGearChange={handleGearChange} 
@@ -169,7 +169,7 @@ export const CockpitController = () => {
       </div>
       
       {/* Footer Zone: Pedals */}
-      <div className="h-[15vh] min-h-16 max-h-28 border-t border-primary/30">
+      <div className="h-[12dvh] min-h-12 max-h-20 border-t border-primary/30 flex-shrink-0">
         <Pedals 
           onThrottleChange={handleThrottleChange}
           onBrakeChange={handleBrakeChange}

@@ -32,7 +32,7 @@ export const Pedals = ({ onThrottleChange, onBrakeChange }: PedalsProps) => {
   }, [onBrakeChange]);
 
   return (
-    <div className="flex h-full gap-1 sm:gap-2 p-1 sm:p-2">
+    <div className="flex h-full gap-0.5 p-0.5">
       {/* Brake Pedal - 30% width */}
       <button
         className={`
@@ -50,14 +50,14 @@ export const Pedals = ({ onThrottleChange, onBrakeChange }: PedalsProps) => {
         onMouseUp={handleBrakeEnd}
         onMouseLeave={handleBrakeEnd}
       >
-        <div className={`racing-text text-sm sm:text-xl font-bold transition-all ${brakePressed ? 'text-white text-glow-red' : 'text-destructive-foreground/70'}`}>
+        <div className={`racing-text text-xs sm:text-lg font-bold transition-all ${brakePressed ? 'text-white text-glow-red' : 'text-destructive-foreground/70'}`}>
           BRAKE
         </div>
-        <div className="flex gap-0.5 sm:gap-1 mt-1 sm:mt-2">
+        <div className="flex gap-0.5 mt-0.5">
           {[...Array(3)].map((_, i) => (
             <div 
               key={i}
-              className={`w-1.5 sm:w-2 h-0.5 sm:h-1 rounded-full transition-colors ${brakePressed ? 'bg-white' : 'bg-destructive/50'}`}
+              className={`w-1 sm:w-1.5 h-0.5 rounded-full transition-colors ${brakePressed ? 'bg-white' : 'bg-destructive/50'}`}
             />
           ))}
         </div>
@@ -80,14 +80,14 @@ export const Pedals = ({ onThrottleChange, onBrakeChange }: PedalsProps) => {
         onMouseUp={handleThrottleEnd}
         onMouseLeave={handleThrottleEnd}
       >
-        <div className={`racing-text text-base sm:text-2xl font-bold transition-all ${throttlePressed ? 'text-white text-glow-teal' : 'text-primary-foreground/70'}`}>
+        <div className={`racing-text text-sm sm:text-xl font-bold transition-all ${throttlePressed ? 'text-white text-glow-teal' : 'text-primary-foreground/70'}`}>
           THROTTLE
         </div>
-        <div className="flex gap-0.5 sm:gap-1 mt-1 sm:mt-2">
+        <div className="flex gap-0.5 mt-0.5">
           {[...Array(5)].map((_, i) => (
             <div 
               key={i}
-              className={`w-2 sm:w-3 h-1 sm:h-1.5 rounded-full transition-all ${
+              className={`w-1.5 sm:w-2 h-0.5 sm:h-1 rounded-full transition-all ${
                 throttlePressed 
                   ? 'bg-white' 
                   : 'bg-primary/50'
@@ -101,7 +101,7 @@ export const Pedals = ({ onThrottleChange, onBrakeChange }: PedalsProps) => {
         </div>
         
         {/* Power Meter */}
-        <div className="w-3/4 h-1.5 sm:h-2 bg-card/50 rounded-full mt-1.5 sm:mt-3 overflow-hidden">
+        <div className="w-3/4 h-1 sm:h-1.5 bg-card/50 rounded-full mt-1 overflow-hidden">
           <div 
             className={`h-full bg-gradient-to-r from-primary via-primary-glow to-white rounded-full transition-all duration-100 ${throttlePressed ? 'w-full' : 'w-0'}`}
           />

@@ -30,7 +30,7 @@ export const Speedometer = ({ speed, maxSpeed = 100 }: SpeedometerProps) => {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative w-[min(22vw,6rem)] aspect-square">
+      <div className="relative w-[min(18vw,5rem)] aspect-square">
         <svg className="w-full h-full" viewBox="0 0 100 100">
           {/* Outer bezel */}
           <circle
@@ -100,25 +100,22 @@ export const Speedometer = ({ speed, maxSpeed = 100 }: SpeedometerProps) => {
             strokeWidth="1"
           />
           
-          {/* Speed numbers */}
-          <text x="18" y="70" fill="hsl(var(--muted-foreground))" fontSize="6" textAnchor="middle">0</text>
-          <text x="12" y="40" fill="hsl(var(--muted-foreground))" fontSize="6" textAnchor="middle">20</text>
-          <text x="30" y="18" fill="hsl(var(--muted-foreground))" fontSize="6" textAnchor="middle">40</text>
-          <text x="70" y="18" fill="hsl(var(--muted-foreground))" fontSize="6" textAnchor="middle">60</text>
-          <text x="88" y="40" fill="hsl(var(--destructive))" fontSize="6" textAnchor="middle">80</text>
-          <text x="82" y="70" fill="hsl(var(--destructive))" fontSize="6" textAnchor="middle">100</text>
+          {/* Speed numbers - simplified */}
+          <text x="18" y="68" fill="hsl(var(--muted-foreground))" fontSize="5" textAnchor="middle">0</text>
+          <text x="50" y="18" fill="hsl(var(--muted-foreground))" fontSize="5" textAnchor="middle">50</text>
+          <text x="82" y="68" fill="hsl(var(--destructive))" fontSize="5" textAnchor="middle">100</text>
         </svg>
         
         {/* Digital readout */}
-        <div className="absolute bottom-[15%] left-1/2 -translate-x-1/2">
-          <span className={`text-[10px] sm:text-sm racing-number font-bold ${isHighSpeed ? 'text-destructive text-glow-red' : 'text-foreground'}`}>
+        <div className="absolute bottom-[18%] left-1/2 -translate-x-1/2">
+          <span className={`text-[8px] sm:text-xs racing-number font-bold ${isHighSpeed ? 'text-destructive text-glow-red' : 'text-foreground'}`}>
             {Math.round(speed)}
           </span>
         </div>
       </div>
       
       {/* Label */}
-      <div className="text-[7px] sm:text-[9px] text-muted-foreground racing-text mt-0.5">KM/H</div>
+      <div className="text-[5px] sm:text-[7px] text-muted-foreground racing-text">KM/H</div>
     </div>
   );
 };
