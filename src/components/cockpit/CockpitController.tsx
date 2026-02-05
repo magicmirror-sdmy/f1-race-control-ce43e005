@@ -180,6 +180,7 @@ export const CockpitController = () => {
          onBrakeChange={handleBrakeChange}
          onEmergencyStop={handleEmergencyStop}
          onAutoModeToggle={handleAutoModeToggle}
+         onSteeringChange={handleAngleChange}
        />
        
       {/* Header */}

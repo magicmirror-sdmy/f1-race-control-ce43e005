@@ -17,6 +17,7 @@
    onBrakeChange: (active: boolean) => void;
    onEmergencyStop: () => void;
    onAutoModeToggle: () => void;
+  onSteeringChange?: (angle: number) => void;
  }
  
  export const ImmersiveHUD = ({
@@ -34,9 +35,11 @@
    onBrakeChange,
    onEmergencyStop,
    onAutoModeToggle,
+  onSteeringChange,
  }: ImmersiveHUDProps) => {
    const { triggerHaptic, playSound } = useGameFeedback();
    const [eBrakeActive, setEBrakeActive] = useState(false);
+  const [steeringDirection, setSteeringDirection] = useState<'left' | 'right' | null>(null);
    
    // RPM simulation based on speed and throttle
    const rpm = Math.min(100, (speed / 100) * 80 + (throttle ? 20 : 0));
@@ -69,6 +72,23 @@
      }
    }, [eBrakeActive, triggerHaptic, playSound, onEmergencyStop]);
  
+  const handleSteerLeft = useCallback(() => {
+    setSteeringDirection('left');
+    triggerHaptic('light');
+    onSteeringChange?.(-45);
+  }, [triggerHaptic, onSteeringChange]);
+
+  const handleSteerRight = useCallback(() => {
+    setSteeringDirection('right');
+    triggerHaptic('light');
+    onSteeringChange?.(45);
+  }, [triggerHaptic, onSteeringChange]);
+
+  const handleSteerEnd = useCallback(() => {
+    setSteeringDirection(null);
+    onSteeringChange?.(0);
+  }, [onSteeringChange]);
+
    if (!isOpen) return null;
  
    return (
@@ -103,8 +123,58 @@
        {/* HUD Layer */}
        <div className="absolute inset-0 z-10 pointer-events-none">
          
+          {/* Steering Zones - Left and Right tap areas */}
+          <div className="absolute inset-0 flex pointer-events-auto">
+            {/* Left Steering Zone */}
+            <button
+              onTouchStart={handleSteerLeft}
+              onTouchEnd={handleSteerEnd}
+              onMouseDown={handleSteerLeft}
+              onMouseUp={handleSteerEnd}
+              onMouseLeave={handleSteerEnd}
+              className={`flex-1 h-full flex items-center justify-start pl-8 transition-all ${
+                steeringDirection === 'left' ? 'bg-primary/10' : ''
+              }`}
+            >
+              {/* Left indicator */}
+              <div className={`flex items-center gap-2 transition-all ${
+                steeringDirection === 'left' ? 'opacity-100 scale-110' : 'opacity-30'
+              }`}>
+                <svg className="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="text-xs racing-text text-primary">LEFT</span>
+              </div>
+            </button>
+            
+            {/* Center dead zone - no steering */}
+            <div className="w-1/3 h-full pointer-events-none" />
+            
+            {/* Right Steering Zone */}
+            <button
+              onTouchStart={handleSteerRight}
+              onTouchEnd={handleSteerEnd}
+              onMouseDown={handleSteerRight}
+              onMouseUp={handleSteerEnd}
+              onMouseLeave={handleSteerEnd}
+              className={`flex-1 h-full flex items-center justify-end pr-8 transition-all ${
+                steeringDirection === 'right' ? 'bg-primary/10' : ''
+              }`}
+            >
+              {/* Right indicator */}
+              <div className={`flex items-center gap-2 transition-all ${
+                steeringDirection === 'right' ? 'opacity-100 scale-110' : 'opacity-30'
+              }`}>
+                <span className="text-xs racing-text text-primary">RIGHT</span>
+                <svg className="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </button>
+          </div>
+          
          {/* Top Center - Status Bar */}
-         <div className="absolute top-2 left-1/2 -translate-x-1/2 pointer-events-auto">
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 pointer-events-auto z-20">
            <div className="flex items-center gap-3 px-4 py-1.5 rounded-full bg-background/40 backdrop-blur-md border border-border/50">
              {/* Auto Pilot Toggle */}
              <button
@@ -142,7 +212,7 @@
          </div>
          
          {/* Top Left - RPM Gauge */}
-         <div className="absolute top-4 left-4">
+          <div className="absolute top-4 left-4 z-20 pointer-events-none">
            <div className="w-24 h-24 rounded-full bg-background/40 backdrop-blur-md border border-border/50 flex flex-col items-center justify-center">
              <svg viewBox="0 0 100 100" className={`w-20 h-20 ${isRedline ? 'animate-[shake_0.1s_infinite]' : ''}`}>
                {/* Background arc */}
@@ -176,7 +246,7 @@
          </div>
          
          {/* Top Right - Speed & Gear */}
-         <div className="absolute top-4 right-4">
+          <div className="absolute top-4 right-4 z-20 pointer-events-none">
            <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-background/40 backdrop-blur-md border border-border/50">
              <div className="text-right">
                <div className="text-3xl racing-number font-bold text-foreground text-glow-teal">
@@ -195,7 +265,7 @@
          </div>
          
          {/* Bottom Left - Brake Zone */}
-         <div className="absolute bottom-4 left-4 pointer-events-auto">
+          <div className="absolute bottom-4 left-4 pointer-events-auto z-20">
            <div className="flex flex-col items-start gap-2">
              {/* E-Brake Toggle */}
              <button
@@ -232,7 +302,7 @@
          </div>
          
          {/* Bottom Right - Throttle Zone */}
-         <div className="absolute bottom-4 right-4 pointer-events-auto">
+          <div className="absolute bottom-4 right-4 pointer-events-auto z-20">
            <button
              onTouchStart={handleThrottleStart}
              onTouchEnd={handleThrottleEnd}

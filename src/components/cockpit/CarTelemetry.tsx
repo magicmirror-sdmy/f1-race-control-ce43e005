@@ -50,6 +50,13 @@ export const CarTelemetry = ({
           {/* Car Shadow */}
           <ellipse cx="50" cy="85" rx="25" ry="60" fill="hsl(var(--primary) / 0.1)" />
           
+          {/* Wheel Spin Animation Definitions */}
+          <defs>
+            <pattern id="tirePattern" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="4" stroke="hsl(var(--border))" strokeWidth="2" />
+            </pattern>
+          </defs>
+          
           {/* Front Wing */}
           <rect x="15" y="10" width="70" height="8" rx="2" fill="hsl(var(--card))" stroke="hsl(var(--primary) / 0.5)" strokeWidth="0.5" />
           
@@ -65,6 +72,16 @@ export const CarTelemetry = ({
               stroke="hsl(var(--border))"
               strokeWidth="1"
             />
+            {/* Tire spin lines */}
+            {speed > 0 && (
+              <g className="animate-spin" style={{ 
+                transformOrigin: '16px 30px',
+                animationDuration: `${Math.max(0.1, 1 - speed / 120)}s`
+              }}>
+                <line x1="16" y1="22" x2="16" y2="26" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
+                <line x1="16" y1="34" x2="16" y2="38" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
+              </g>
+            )}
           </g>
           
           {/* Front Right Tire */}
@@ -79,6 +96,16 @@ export const CarTelemetry = ({
               stroke="hsl(var(--border))"
               strokeWidth="1"
             />
+            {/* Tire spin lines */}
+            {speed > 0 && (
+              <g className="animate-spin" style={{ 
+                transformOrigin: '84px 30px',
+                animationDuration: `${Math.max(0.1, 1 - speed / 120)}s`
+              }}>
+                <line x1="84" y1="22" x2="84" y2="26" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
+                <line x1="84" y1="34" x2="84" y2="38" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
+              </g>
+            )}
           </g>
           
           {/* Nose Cone */}
@@ -105,38 +132,86 @@ export const CarTelemetry = ({
           <line x1="50" y1="80" x2="50" y2="105" stroke="hsl(var(--primary) / 0.5)" strokeWidth="1" />
           
           {/* Rear Left Tire - with heat glow */}
-          <rect
-            x="8"
-            y="115"
-            width="14"
-            height="28"
-            rx="2"
-            className={`transition-all ${throttle || brake ? 'fill-destructive/80' : 'fill-card'}`}
-            stroke={throttle || brake ? "hsl(var(--destructive))" : "hsl(var(--border))"}
-            strokeWidth="1"
-            style={{
-              filter: throttle || brake ? 'drop-shadow(0 0 4px hsl(var(--destructive)))' : 'none'
-            }}
-          />
+          <g>
+            <rect
+              x="8"
+              y="115"
+              width="14"
+              height="28"
+              rx="2"
+              className={`transition-all ${throttle || brake ? 'fill-destructive/80' : 'fill-card'}`}
+              stroke={throttle || brake ? "hsl(var(--destructive))" : "hsl(var(--border))"}
+              strokeWidth="1"
+              style={{
+                filter: throttle || brake ? 'drop-shadow(0 0 4px hsl(var(--destructive)))' : 'none'
+              }}
+            />
+            {/* Tire spin lines */}
+            {speed > 0 && (
+              <g className="animate-spin" style={{ 
+                transformOrigin: '15px 129px',
+                animationDuration: `${Math.max(0.1, 1 - speed / 120)}s`
+              }}>
+                <line x1="15" y1="118" x2="15" y2="124" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
+                <line x1="15" y1="134" x2="15" y2="140" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
+              </g>
+            )}
+          </g>
           
           {/* Rear Right Tire - with heat glow */}
-          <rect
-            x="78"
-            y="115"
-            width="14"
-            height="28"
-            rx="2"
-            className={`transition-all ${throttle || brake ? 'fill-destructive/80' : 'fill-card'}`}
-            stroke={throttle || brake ? "hsl(var(--destructive))" : "hsl(var(--border))"}
-            strokeWidth="1"
-            style={{
-              filter: throttle || brake ? 'drop-shadow(0 0 4px hsl(var(--destructive)))' : 'none'
-            }}
-          />
+          <g>
+            <rect
+              x="78"
+              y="115"
+              width="14"
+              height="28"
+              rx="2"
+              className={`transition-all ${throttle || brake ? 'fill-destructive/80' : 'fill-card'}`}
+              stroke={throttle || brake ? "hsl(var(--destructive))" : "hsl(var(--border))"}
+              strokeWidth="1"
+              style={{
+                filter: throttle || brake ? 'drop-shadow(0 0 4px hsl(var(--destructive)))' : 'none'
+              }}
+            />
+            {/* Tire spin lines */}
+            {speed > 0 && (
+              <g className="animate-spin" style={{ 
+                transformOrigin: '85px 129px',
+                animationDuration: `${Math.max(0.1, 1 - speed / 120)}s`
+              }}>
+                <line x1="85" y1="118" x2="85" y2="124" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
+                <line x1="85" y1="134" x2="85" y2="140" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
+              </g>
+            )}
+          </g>
           
           {/* Rear Wing */}
           <rect x="12" y="148" width="76" height="6" rx="1" fill="hsl(var(--card))" stroke="hsl(var(--primary) / 0.5)" strokeWidth="0.5" />
           <rect x="20" y="145" width="60" height="3" rx="1" fill="hsl(var(--muted))" />
+          
+          {/* Brake Lights - Center rear */}
+          <rect 
+            x="40" 
+            y="143" 
+            width="20" 
+            height="3" 
+            rx="1" 
+            className={`transition-all duration-100 ${brake ? 'fill-destructive' : 'fill-muted'}`}
+            style={{
+              filter: brake ? 'drop-shadow(0 0 6px hsl(var(--destructive))) drop-shadow(0 0 10px hsl(var(--destructive)))' : 'none'
+            }}
+          />
+          {/* Brake light glow effect */}
+          {brake && (
+            <ellipse 
+              cx="50" 
+              cy="144" 
+              rx="15" 
+              ry="8" 
+              fill="hsl(var(--destructive) / 0.3)"
+              className="animate-pulse"
+            />
+          )}
           
           {/* DRS Indicator */}
           <circle cx="50" cy="150" r="2" className={`transition-colors ${gear === 'S' ? 'fill-primary' : 'fill-muted'}`} />
