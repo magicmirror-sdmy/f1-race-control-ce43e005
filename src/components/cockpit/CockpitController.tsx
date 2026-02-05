@@ -5,6 +5,7 @@ import { CameraFeed } from "./CameraFeed";
 import { CarTelemetry } from "./CarTelemetry";
 import { GearShifter } from "./GearShifter";
 import { Pedals } from "./Pedals";
+ import { ImmersiveHUD } from "./ImmersiveHUD";
 
 interface ControlState {
   steeringAngle: number;
@@ -25,6 +26,9 @@ export const CockpitController = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [serverIp, setServerIp] = useState("");
   const speedIntervalRef = useRef<number | null>(null);
+   const [isAutoMode, setIsAutoMode] = useState(false);
+   const [isEmergencyStop, setIsEmergencyStop] = useState(false);
+   const [isImmersiveMode, setIsImmersiveMode] = useState(false);
 
   // Simulate speed based on throttle/brake/gear
   useEffect(() => {
@@ -35,6 +39,12 @@ export const CockpitController = () => {
     speedIntervalRef.current = window.setInterval(() => {
       setControlState(prev => {
         let newSpeed = prev.speed;
+         
+         // Emergency stop - immediate halt
+         if (isEmergencyStop) {
+           return { ...prev, speed: 0, throttle: false };
+         }
+         
         const gearMultiplier = {
           'R': -0.3,
           'N': 0,
@@ -44,7 +54,10 @@ export const CockpitController = () => {
           'S': 1.2,
         }[prev.gear] || 0;
 
-        if (prev.throttle && !prev.brake && prev.gear !== 'N') {
+         // Auto mode - auto accelerate in current gear
+         const isThrottleActive = prev.throttle || isAutoMode;
+ 
+         if (isThrottleActive && !prev.brake && prev.gear !== 'N') {
           newSpeed = Math.min(100, prev.speed + (2 * gearMultiplier));
         } else if (prev.brake) {
           newSpeed = Math.max(0, prev.speed - 5);
@@ -62,7 +75,7 @@ export const CockpitController = () => {
         clearInterval(speedIntervalRef.current);
       }
     };
-  }, []);
+   }, [isAutoMode, isEmergencyStop]);
 
   const sendCommand = useCallback((command: string, value: unknown) => {
     if (!isConnected || !serverIp) return;
@@ -87,7 +100,9 @@ export const CockpitController = () => {
   const handleDisconnect = useCallback(() => {
     setIsConnected(false);
     setServerIp("");
-    setControlState(prev => ({ ...prev, speed: 0, throttle: false, brake: false, gear: 'N' }));
+     setControlState(prev => ({ ...prev, speed: 0, throttle: false, brake: false, gear: 'N' }));
+     setIsAutoMode(false);
+     setIsEmergencyStop(false);
     console.log("Disconnected");
   }, []);
 
@@ -119,8 +134,54 @@ export const CockpitController = () => {
     sendCommand("action", "donut");
   }, [sendCommand]);
 
+   const handleEmergencyStop = useCallback(() => {
+     setIsEmergencyStop(prev => {
+       const newState = !prev;
+       if (newState) {
+         setControlState(prev => ({ ...prev, speed: 0, throttle: false }));
+         setIsAutoMode(false);
+       }
+       sendCommand("emergency_stop", newState);
+       return newState;
+     });
+   }, [sendCommand]);
+ 
+   const handleAutoModeToggle = useCallback(() => {
+     if (isEmergencyStop) return; // Don't allow auto mode during emergency stop
+     setIsAutoMode(prev => {
+       const newState = !prev;
+       sendCommand("auto_mode", newState);
+       return newState;
+     });
+   }, [sendCommand, isEmergencyStop]);
+ 
+   const handleOpenImmersive = useCallback(() => {
+     setIsImmersiveMode(true);
+   }, []);
+ 
+   const handleCloseImmersive = useCallback(() => {
+     setIsImmersiveMode(false);
+   }, []);
+ 
   return (
     <div className="h-[100dvh] w-full flex flex-col overflow-hidden">
+       {/* Immersive HUD Overlay */}
+       <ImmersiveHUD
+         isOpen={isImmersiveMode}
+         onClose={handleCloseImmersive}
+         speed={controlState.speed}
+         gear={controlState.gear}
+         throttle={controlState.throttle}
+         brake={controlState.brake}
+         isConnected={isConnected}
+         isAutoMode={isAutoMode}
+         isEmergencyStop={isEmergencyStop}
+         onThrottleChange={handleThrottleChange}
+         onBrakeChange={handleBrakeChange}
+         onEmergencyStop={handleEmergencyStop}
+         onAutoModeToggle={handleAutoModeToggle}
+       />
+       
       {/* Header */}
       <Header 
         isConnected={isConnected}
@@ -134,7 +195,7 @@ export const CockpitController = () => {
         <div className="flex-[0.35] border-r border-border/30 racing-panel m-0.5 flex flex-col overflow-hidden">
           {/* Camera Feed - Top */}
           <div className="h-[30%] min-h-[4rem] p-0.5 border-b border-border/30">
-            <CameraFeed isConnected={isConnected} />
+             <CameraFeed isConnected={isConnected} onTap={handleOpenImmersive} />
           </div>
           
           {/* Steering Wheel - Bottom */}
@@ -164,6 +225,10 @@ export const CockpitController = () => {
           <GearShifter 
             currentGear={controlState.gear} 
             onGearChange={handleGearChange} 
+             isAutoMode={isAutoMode}
+             onAutoModeToggle={handleAutoModeToggle}
+             isEmergencyStop={isEmergencyStop}
+             onEmergencyStop={handleEmergencyStop}
           />
         </div>
       </div>

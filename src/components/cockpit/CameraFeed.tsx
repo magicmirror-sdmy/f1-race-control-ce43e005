@@ -2,20 +2,24 @@ import { Video } from "lucide-react";
 
 interface CameraFeedProps {
   isConnected: boolean;
+   onTap?: () => void;
 }
 
-export const CameraFeed = ({ isConnected }: CameraFeedProps) => {
+ export const CameraFeed = ({ isConnected, onTap }: CameraFeedProps) => {
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden">
+     <div className="w-full h-full flex flex-col overflow-hidden cursor-pointer" onClick={onTap}>
       <div className="racing-text text-[6px] sm:text-[8px] text-muted-foreground text-center mb-px">LIVE FEED</div>
       
-      <div className="flex-1 racing-panel overflow-hidden relative bg-card/80 min-h-0">
+       <div className="flex-1 racing-panel overflow-hidden relative bg-card/80 min-h-0 hover:border-primary/50 transition-colors">
         {/* Placeholder for camera feed */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <Video className={`w-3 h-3 sm:w-5 sm:h-5 ${isConnected ? 'text-primary' : 'text-muted-foreground'}`} />
           <span className="text-[5px] sm:text-[7px] text-muted-foreground racing-text mt-0.5">
             {isConnected ? 'CONNECTING...' : 'NO SIGNAL'}
           </span>
+           <span className="text-[4px] sm:text-[5px] text-primary/60 racing-text mt-1">
+             TAP FOR HELMET CAM
+           </span>
         </div>
         
         {/* Scanline effect */}
