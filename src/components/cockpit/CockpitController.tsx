@@ -26,9 +26,13 @@ export const CockpitController = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [serverIp, setServerIp] = useState("");
   const speedIntervalRef = useRef<number | null>(null);
-   const [isAutoMode, setIsAutoMode] = useState(false);
-   const [isEmergencyStop, setIsEmergencyStop] = useState(false);
-   const [isImmersiveMode, setIsImmersiveMode] = useState(false);
+  const [isAutoMode, setIsAutoMode] = useState(false);
+  const [isEmergencyStop, setIsEmergencyStop] = useState(false);
+  const [isImmersiveMode, setIsImmersiveMode] = useState(false);
+  const [isInfraredOn, setIsInfraredOn] = useState(false);
+  const [isSonarOn, setIsSonarOn] = useState(false);
+  const [isAutopilotOn, setIsAutopilotOn] = useState(false);
+  const [isStarted, setIsStarted] = useState(false);
 
   // Simulate speed based on throttle/brake/gear
   useEffect(() => {
@@ -155,13 +159,51 @@ export const CockpitController = () => {
      });
    }, [sendCommand, isEmergencyStop]);
  
-   const handleOpenImmersive = useCallback(() => {
-     setIsImmersiveMode(true);
-   }, []);
- 
-   const handleCloseImmersive = useCallback(() => {
-     setIsImmersiveMode(false);
-   }, []);
+  const handleOpenImmersive = useCallback(() => {
+    setIsImmersiveMode(true);
+  }, []);
+
+  const handleCloseImmersive = useCallback(() => {
+    setIsImmersiveMode(false);
+  }, []);
+
+  const handleInfraredToggle = useCallback(() => {
+    setIsInfraredOn(prev => {
+      const newState = !prev;
+      sendCommand("infrared", newState);
+      return newState;
+    });
+  }, [sendCommand]);
+
+  const handleSonarToggle = useCallback(() => {
+    setIsSonarOn(prev => {
+      const newState = !prev;
+      sendCommand("sonar", newState);
+      return newState;
+    });
+  }, [sendCommand]);
+
+  const handleAutopilotToggle = useCallback(() => {
+    if (isEmergencyStop) return;
+    setIsAutopilotOn(prev => {
+      const newState = !prev;
+      sendCommand("autopilot", newState);
+      return newState;
+    });
+  }, [sendCommand, isEmergencyStop]);
+
+  const handleStart = useCallback(() => {
+    if (isEmergencyStop) return;
+    setIsStarted(true);
+    sendCommand("power", "start");
+  }, [sendCommand, isEmergencyStop]);
+
+  const handleStop = useCallback(() => {
+    setIsStarted(false);
+    setIsAutopilotOn(false);
+    setIsAutoMode(false);
+    sendCommand("power", "stop");
+  }, [sendCommand]);
  
   return (
     <div className="h-[100dvh] w-full flex flex-col overflow-hidden">
@@ -226,10 +268,19 @@ export const CockpitController = () => {
           <GearShifter 
             currentGear={controlState.gear} 
             onGearChange={handleGearChange} 
-             isAutoMode={isAutoMode}
-             onAutoModeToggle={handleAutoModeToggle}
-             isEmergencyStop={isEmergencyStop}
-             onEmergencyStop={handleEmergencyStop}
+            isAutoMode={isAutoMode}
+            onAutoModeToggle={handleAutoModeToggle}
+            isEmergencyStop={isEmergencyStop}
+            onEmergencyStop={handleEmergencyStop}
+            isInfraredOn={isInfraredOn}
+            onInfraredToggle={handleInfraredToggle}
+            isSonarOn={isSonarOn}
+            onSonarToggle={handleSonarToggle}
+            isAutopilotOn={isAutopilotOn}
+            onAutopilotToggle={handleAutopilotToggle}
+            isStarted={isStarted}
+            onStart={handleStart}
+            onStop={handleStop}
           />
         </div>
       </div>
