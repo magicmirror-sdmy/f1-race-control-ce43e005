@@ -7,6 +7,7 @@ import { GearShifter } from "./GearShifter";
 import { Pedals } from "./Pedals";
 import { ImmersiveHUD } from "./ImmersiveHUD";
 import { SensorStatus } from "./ServiceIndicator";
+import { AutopilotStatus } from "./AutopilotTelemetry";
 
 interface ControlState {
   steeringAngle: number;
@@ -34,6 +35,34 @@ export const CockpitController = () => {
   const [isSonarOn, setIsSonarOn] = useState(false);
   const [isAutopilotOn, setIsAutopilotOn] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
+  
+  // Autopilot telemetry data (will be updated from backend)
+  const [autopilotStatus, setAutopilotStatus] = useState<AutopilotStatus>("CRUISING");
+  const [autopilotAcceleration, setAutopilotAcceleration] = useState(0);
+  const [autopilotDistance, setAutopilotDistance] = useState(100);
+  
+  // Demo: Simulate autopilot status changes (remove in production)
+  useEffect(() => {
+    if (!isAutopilotOn) return;
+    
+    const statuses: AutopilotStatus[] = ["CRUISING", "PANIC_BRAKE", "REVERSING", "PIVOTING", "RECOVERY", "CRUISING"];
+    let index = 0;
+    
+    const statusInterval = setInterval(() => {
+      index = (index + 1) % statuses.length;
+      setAutopilotStatus(statuses[index]);
+    }, 3000);
+    
+    const dataInterval = setInterval(() => {
+      setAutopilotAcceleration(Math.random() * 80 + 20);
+      setAutopilotDistance(Math.floor(Math.random() * 180 + 20));
+    }, 500);
+    
+    return () => {
+      clearInterval(statusInterval);
+      clearInterval(dataInterval);
+    };
+  }, [isAutopilotOn]);
   
   // Sensor status for service indicator (can be updated from backend)
   const [sensorStatuses, setSensorStatuses] = useState<SensorStatus[]>([
@@ -279,7 +308,7 @@ export const CockpitController = () => {
           />
         </div>
         
-        {/* Right Zone: Gear Shifter */}
+        {/* Right Zone: Gear Shifter / Autopilot Telemetry */}
         <div className="flex-[0.25] border-l border-border/30 racing-panel m-0.5 overflow-hidden">
           <GearShifter 
             currentGear={controlState.gear} 
@@ -297,6 +326,9 @@ export const CockpitController = () => {
             isStarted={isStarted}
             onStart={handleStart}
             onStop={handleStop}
+            autopilotStatus={autopilotStatus}
+            autopilotAcceleration={autopilotAcceleration}
+            autopilotDistance={autopilotDistance}
           />
         </div>
       </div>
