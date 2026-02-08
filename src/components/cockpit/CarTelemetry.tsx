@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Rocket, RotateCcw } from "lucide-react";
 import { Speedometer } from "./Speedometer";
+import { ServiceIndicator, SensorStatus } from "./ServiceIndicator";
 
 interface CarTelemetryProps {
   steeringAngle: number;
@@ -10,7 +11,18 @@ interface CarTelemetryProps {
   speed: number;
   onLaunch: () => void;
   onDonut: () => void;
+  sensorStatuses?: SensorStatus[];
+  requiresService?: boolean;
 }
+
+const defaultSensorStatuses: SensorStatus[] = [
+  { name: "Front Sonar", status: "ok" },
+  { name: "Rear Sonar", status: "ok" },
+  { name: "Left IR", status: "ok" },
+  { name: "Right IR", status: "ok" },
+  { name: "GPS Module", status: "ok" },
+  { name: "IMU Sensor", status: "ok" },
+];
 
 export const CarTelemetry = ({
   steeringAngle,
@@ -20,6 +32,8 @@ export const CarTelemetry = ({
   speed,
   onLaunch,
   onDonut,
+  sensorStatuses = defaultSensorStatuses,
+  requiresService = false,
 }: CarTelemetryProps) => {
   const [launchActive, setLaunchActive] = useState(false);
   const [donutActive, setDonutActive] = useState(false);
@@ -41,8 +55,17 @@ export const CarTelemetry = ({
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-0.5 overflow-hidden">
-      {/* Speedometer at top */}
-      <Speedometer speed={speed} maxSpeed={100} />
+      {/* Speedometer with Service Indicator */}
+      <div className="relative">
+        <Speedometer speed={speed} maxSpeed={100} />
+        {/* Service indicator positioned to the right of speedometer */}
+        <div className="absolute -right-7 sm:-right-9 top-1/2 -translate-y-1/2">
+          <ServiceIndicator 
+            sensors={sensorStatuses} 
+            requiresService={requiresService} 
+          />
+        </div>
+      </div>
       
       <div className="relative w-[min(22vw,8rem)] mt-0.5">
         {/* Car Body - Top Down View */}

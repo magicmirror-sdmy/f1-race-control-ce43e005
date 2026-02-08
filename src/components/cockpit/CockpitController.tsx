@@ -5,7 +5,8 @@ import { CameraFeed } from "./CameraFeed";
 import { CarTelemetry } from "./CarTelemetry";
 import { GearShifter } from "./GearShifter";
 import { Pedals } from "./Pedals";
- import { ImmersiveHUD } from "./ImmersiveHUD";
+import { ImmersiveHUD } from "./ImmersiveHUD";
+import { SensorStatus } from "./ServiceIndicator";
 
 interface ControlState {
   steeringAngle: number;
@@ -33,6 +34,19 @@ export const CockpitController = () => {
   const [isSonarOn, setIsSonarOn] = useState(false);
   const [isAutopilotOn, setIsAutopilotOn] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
+  
+  // Sensor status for service indicator (can be updated from backend)
+  const [sensorStatuses, setSensorStatuses] = useState<SensorStatus[]>([
+    { name: "Front Sonar", status: "ok" },
+    { name: "Rear Sonar", status: "ok" },
+    { name: "Left IR", status: "ok" },
+    { name: "Right IR", status: "ok" },
+    { name: "GPS Module", status: "ok" },
+    { name: "IMU Sensor", status: "ok" },
+  ]);
+  
+  // Demo: Toggle a warning state for testing (remove in production)
+  const [requiresService, setRequiresService] = useState(true);
 
   // Simulate speed based on throttle/brake/gear
   useEffect(() => {
@@ -260,6 +274,8 @@ export const CockpitController = () => {
             speed={controlState.speed}
             onLaunch={handleLaunch}
             onDonut={handleDonut}
+            sensorStatuses={sensorStatuses}
+            requiresService={requiresService}
           />
         </div>
         
