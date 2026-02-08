@@ -41,6 +41,12 @@
     --accent: 30 100% 50%;
     --accent-foreground: 0 0% 0%;
     
+    /* Status Colors */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 0%;
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    
     /* UI Elements */
     --border: 180 30% 20%;
     --input: 200 20% 15%;
