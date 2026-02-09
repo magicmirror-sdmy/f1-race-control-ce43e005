@@ -1,4 +1,5 @@
 import { ConnectionDialog } from "./ConnectionDialog";
+import { SettingsDialog, TuningConstants } from "./SettingsDialog";
 
 interface HeaderProps {
   driverName?: string;
@@ -6,6 +7,8 @@ interface HeaderProps {
   isConnected: boolean;
   onConnect: (ip: string) => void;
   onDisconnect: () => void;
+  tuning: TuningConstants;
+  onTuningChange: (tuning: TuningConstants) => void;
 }
 
 export const Header = ({ 
@@ -13,7 +16,9 @@ export const Header = ({
   position = "P1",
   isConnected,
   onConnect,
-  onDisconnect
+  onDisconnect,
+  tuning,
+  onTuningChange,
 }: HeaderProps) => {
   return (
     <header className="flex items-center justify-between px-1.5 sm:px-4 py-0.5 sm:py-1.5 border-b border-primary/30 bg-card/30 backdrop-blur-sm h-[6dvh] min-h-[1.75rem] max-h-10 flex-shrink-0">
@@ -50,6 +55,8 @@ export const Header = ({
         <div className="w-4 h-4 sm:w-6 sm:h-6 bg-primary rounded flex items-center justify-center">
           <span className="text-primary-foreground font-bold text-[8px] sm:text-xs">44</span>
         </div>
+        {/* Settings Dialog */}
+        <SettingsDialog tuning={tuning} onTuningChange={onTuningChange} />
         {/* Connection Dialog */}
         <ConnectionDialog
           isConnected={isConnected}

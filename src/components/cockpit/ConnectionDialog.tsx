@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Satellite, X, Wifi, WifiOff } from "lucide-react";
+import { X, Wifi, WifiOff } from "lucide-react";
 import { z } from "zod";
 
 interface ConnectionDialogProps {
@@ -47,7 +47,7 @@ export const ConnectionDialog = ({ isConnected, onConnect, onDisconnect }: Conne
           }
         `}
       >
-        <Satellite className="w-5 h-5" />
+        <Wifi className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
 
       {/* Dialog Overlay */}
@@ -57,7 +57,7 @@ export const ConnectionDialog = ({ isConnected, onConnect, onDisconnect }: Conne
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Satellite className="w-5 h-5 text-primary" />
+                <Wifi className="w-5 h-5 text-primary" />
                 <span className="racing-text text-sm text-foreground">CONNECT TO CAR</span>
               </div>
               <button
