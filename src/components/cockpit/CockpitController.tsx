@@ -8,6 +8,7 @@ import { Pedals } from "./Pedals";
 import { ImmersiveHUD } from "./ImmersiveHUD";
 import { SensorStatus } from "./ServiceIndicator";
 import { AutopilotStatus } from "./AutopilotTelemetry";
+import { TuningConstants, DEFAULT_TUNING } from "./SettingsDialog";
 
 interface ControlState {
   steeringAngle: number;
@@ -35,6 +36,7 @@ export const CockpitController = () => {
   const [isSonarOn, setIsSonarOn] = useState(false);
   const [isAutopilotOn, setIsAutopilotOn] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
+  const [tuning, setTuning] = useState<TuningConstants>({ ...DEFAULT_TUNING });
   
   // Autopilot telemetry data (will be updated from backend)
   const [autopilotStatus, setAutopilotStatus] = useState<AutopilotStatus>("CRUISING");
@@ -273,6 +275,8 @@ export const CockpitController = () => {
         isConnected={isConnected}
         onConnect={handleConnect}
         onDisconnect={handleDisconnect}
+        tuning={tuning}
+        onTuningChange={setTuning}
       />
       
       {/* Main Content */}
