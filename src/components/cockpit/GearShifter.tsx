@@ -1,4 +1,4 @@
-import { OctagonX, Zap, Play, Square, Eye, Radio, Navigation } from "lucide-react";
+import { OctagonX, Zap, Play, Square, Eye, Radio, Navigation, Camera } from "lucide-react";
 import { AutopilotTelemetry, AutopilotStatus } from "./AutopilotTelemetry";
 
 interface GearShifterProps {
@@ -17,13 +17,19 @@ interface GearShifterProps {
   isStarted: boolean;
   onStart: () => void;
   onStop: () => void;
-  // Autopilot telemetry data
   autopilotStatus?: AutopilotStatus;
   autopilotAcceleration?: number;
   autopilotDistance?: number;
 }
 
-const GEARS = ["S", "3", "2", "1", "N", "R"];
+const GEAR_POSITIONS: { gear: string; col: number; row: number }[] = [
+  { gear: "S", col: 0, row: 0 },
+  { gear: "3", col: 1, row: 0 },
+  { gear: "2", col: 2, row: 0 },
+  { gear: "1", col: 0, row: 1 },
+  { gear: "N", col: 1, row: 1 },
+  { gear: "R", col: 2, row: 1 },
+];
 
 export const GearShifter = ({ 
   currentGear, 
@@ -45,15 +51,13 @@ export const GearShifter = ({
   autopilotAcceleration = 0,
   autopilotDistance = 100,
 }: GearShifterProps) => {
-  // Disable all controls except E-STOP and STOP when autopilot is on
   const isDisabled = isAutopilotOn;
   const disabledClass = isDisabled ? "opacity-40 pointer-events-none" : "";
 
-  // If autopilot is on, show the autopilot telemetry instead of gears
+  // If autopilot is on, show autopilot telemetry instead of gears
   if (isAutopilotOn) {
     return (
-      <div className="flex flex-col items-center h-full py-0.5 px-0.5 overflow-hidden gap-0.5">
-        {/* Autopilot Telemetry replaces gear display */}
+      <div className="flex flex-col items-center h-full py-1 px-1 overflow-hidden gap-1">
         <div className="flex-1 w-full overflow-hidden">
           <AutopilotTelemetry
             status={autopilotStatus}
@@ -62,7 +66,7 @@ export const GearShifter = ({
           />
         </div>
         
-        {/* Emergency Stop Button - Always enabled */}
+        {/* Emergency Stop - Always enabled */}
         <button
           onClick={onEmergencyStop}
           className={`
@@ -78,14 +82,10 @@ export const GearShifter = ({
           {isEmergencyStop ? 'STOPPED' : 'E-STOP'}
         </button>
         
-        {/* Stop Button - Always enabled to exit autopilot */}
+        {/* Stop Button */}
         <button
           onClick={onStop}
-          className={`
-            w-full h-[4dvh] max-h-8 min-h-5 rounded-lg border-2 flex items-center justify-center gap-0.5
-            text-[8px] sm:text-[10px] font-bold racing-text transition-all touch-feedback
-            bg-card border-destructive/50 text-destructive hover:bg-destructive/20 hover:border-destructive
-          `}
+          className="w-full h-[4dvh] max-h-8 min-h-5 rounded-lg border-2 flex items-center justify-center gap-0.5 text-[8px] sm:text-[10px] font-bold racing-text transition-all touch-feedback bg-card border-destructive/50 text-destructive hover:bg-destructive/20 hover:border-destructive"
         >
           <Square className="w-3 h-3 sm:w-4 sm:h-4" />
           STOP AUTOPILOT
@@ -95,156 +95,166 @@ export const GearShifter = ({
   }
 
   return (
-    <div className="flex flex-col items-center h-full py-0.5 px-0.5 overflow-hidden gap-0.5">
-      <div className="racing-text text-[8px] sm:text-xs text-muted-foreground mb-0.5">GEAR</div>
+    <div className="flex flex-col items-center h-full py-1 px-1.5 overflow-hidden gap-1">
+      {/* LIVE TELEMETRY Header */}
+      <div className="racing-text text-[8px] sm:text-xs text-muted-foreground tracking-widest">LIVE TELEMETRY</div>
       
-      <div className={`flex flex-col gap-0.5 justify-center overflow-hidden ${disabledClass}`}>
-        {GEARS.map((gear) => {
-          const isActive = currentGear === gear;
-          const isReverse = gear === "R";
-          
-          return (
-            <button
-              key={gear}
-              onClick={() => !isDisabled && onGearChange(gear)}
-              disabled={isDisabled}
-              className={`
-                w-[8vw] h-[4dvh] max-w-12 max-h-7 min-w-6 min-h-4 rounded border text-[10px] sm:text-sm font-bold racing-text
-                transition-all duration-100 touch-feedback
-                ${isActive
-                  ? isReverse
-                    ? "gear-reverse-active border-destructive"
-                    : "gear-active border-primary"
-                  : "bg-card border-border hover:border-primary/50 text-muted-foreground hover:text-foreground"
-                }
-              `}
-            >
-              {gear}
-            </button>
-          );
-        })}
-      </div>
-      
-      {/* Telemetry Wave */}
-      <div className={`w-full overflow-hidden h-3 sm:h-5 border border-border rounded bg-card/50 ${disabledClass}`}>
-        <svg className="w-[200%] h-full animate-telemetry" viewBox="0 0 200 30" preserveAspectRatio="none">
-          <path
-            d="M0,15 Q10,5 20,15 T40,15 T60,15 T80,15 T100,15 T120,15 T140,15 T160,15 T180,15 T200,15"
-            fill="none"
-            stroke="hsl(var(--primary))"
-            strokeWidth="1.5"
-            className="opacity-70"
-          />
-          <path
-            d="M0,15 Q10,25 20,15 T40,15 T60,15 T80,15 T100,15 T120,15 T140,15 T160,15 T180,15 T200,15"
-            fill="none"
-            stroke="hsl(var(--primary))"
-            strokeWidth="1"
-            className="opacity-40"
-          />
-        </svg>
-      </div>
-      <div className={`text-[5px] sm:text-[7px] text-muted-foreground racing-text ${disabledClass}`}>LIVE TELEMETRY</div>
-      
-      {/* Emergency Stop Button - Always enabled */}
-      <button
-        onClick={onEmergencyStop}
-        className={`
-          w-full h-[3.5dvh] max-h-7 min-h-4 rounded border flex items-center justify-center gap-1
-          text-[8px] sm:text-[10px] font-bold racing-text transition-all touch-feedback
-          ${isEmergencyStop
-            ? 'bg-destructive border-destructive text-destructive-foreground glow-red animate-pulse'
-            : 'bg-card border-destructive/50 text-destructive hover:bg-destructive/20 hover:border-destructive'
-          }
-        `}
-      >
-        <OctagonX className="w-3 h-3 sm:w-4 sm:h-4" />
-        {isEmergencyStop ? 'STOPPED' : 'E-STOP'}
-      </button>
-      
-      {/* Auto Mode Toggle */}
-      <button
-        onClick={() => !isDisabled && onAutoModeToggle()}
-        disabled={isDisabled}
-        className={`
-          w-full h-[3.5dvh] max-h-7 min-h-4 rounded border flex items-center justify-center gap-1
-          text-[8px] sm:text-[10px] font-bold racing-text transition-all touch-feedback
-          ${disabledClass}
-          ${isAutoMode
-            ? 'bg-primary border-primary text-primary-foreground glow-teal'
-            : 'bg-card border-primary/50 text-primary hover:bg-primary/20 hover:border-primary'
-          }
-        `}
-      >
-        <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-        AUTO {isAutoMode ? 'ON' : 'OFF'}
-      </button>
-      
-      {/* Sensor Toggles - Middle Section */}
-      <div className={`w-full grid grid-cols-2 gap-0.5 mt-0.5 ${disabledClass}`}>
-        {/* Infrared Toggle */}
+      {/* E-STOP and AUTO side by side */}
+      <div className="w-full grid grid-cols-2 gap-1">
+        {/* E-STOP */}
         <button
-          onClick={() => !isDisabled && onInfraredToggle()}
-          disabled={isDisabled}
+          onClick={onEmergencyStop}
           className={`
-            h-[3.5dvh] max-h-7 min-h-4 rounded border flex flex-col items-center justify-center
-            text-[6px] sm:text-[8px] font-bold racing-text transition-all touch-feedback
-            ${isInfraredOn
-              ? 'bg-amber-500 border-amber-500 text-amber-950 glow-amber'
-              : 'bg-card border-amber-500/50 text-amber-500 hover:bg-amber-500/20 hover:border-amber-500'
+            h-[5dvh] max-h-10 min-h-6 rounded-lg border-2 flex items-center justify-center
+            transition-all touch-feedback
+            ${isEmergencyStop
+              ? 'bg-destructive border-destructive text-destructive-foreground glow-red animate-pulse'
+              : 'bg-card border-destructive text-destructive hover:bg-destructive/20'
             }
           `}
         >
-          <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-          <span className="leading-none">IR</span>
+          <OctagonX className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
         
-        {/* Sonar Toggle */}
+        {/* AUTO */}
+        <button
+          onClick={() => !isDisabled && onAutoModeToggle()}
+          disabled={isDisabled}
+          className={`
+            h-[5dvh] max-h-10 min-h-6 rounded-lg border-2 flex items-center justify-center
+            transition-all touch-feedback ${disabledClass}
+            ${isAutoMode
+              ? 'bg-primary border-primary text-primary-foreground glow-teal'
+              : 'bg-card border-primary text-primary hover:bg-primary/20'
+            }
+          `}
+        >
+          <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
+        </button>
+      </div>
+      
+      {/* Circular Sensor Toggles Row */}
+      <div className={`w-full flex items-center justify-center gap-1.5 sm:gap-2 py-0.5 ${disabledClass}`}>
+        {/* Autopilot */}
+        <button
+          onClick={onAutopilotToggle}
+          className={`
+            w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center
+            transition-all touch-feedback
+            ${isAutopilotOn
+              ? 'bg-green-500 border-green-500 text-green-950 glow-green'
+              : 'bg-card border-green-500 text-green-500 hover:bg-green-500/20'
+            }
+          `}
+        >
+          <Navigation className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        </button>
+        
+        {/* Sonar */}
         <button
           onClick={() => !isDisabled && onSonarToggle()}
           disabled={isDisabled}
           className={`
-            h-[3.5dvh] max-h-7 min-h-4 rounded border flex flex-col items-center justify-center
-            text-[6px] sm:text-[8px] font-bold racing-text transition-all touch-feedback
+            w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center
+            transition-all touch-feedback
             ${isSonarOn
-              ? 'bg-cyan-500 border-cyan-500 text-cyan-950 glow-cyan'
-              : 'bg-card border-cyan-500/50 text-cyan-500 hover:bg-cyan-500/20 hover:border-cyan-500'
+              ? 'bg-blue-500 border-blue-500 text-blue-950 glow-cyan'
+              : 'bg-card border-blue-500 text-blue-500 hover:bg-blue-500/20'
             }
           `}
         >
-          <Radio className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-          <span className="leading-none">SONAR</span>
+          <Radio className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        </button>
+        
+        {/* IR */}
+        <button
+          onClick={() => !isDisabled && onInfraredToggle()}
+          disabled={isDisabled}
+          className={`
+            w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center
+            transition-all touch-feedback
+            ${isInfraredOn
+              ? 'bg-amber-500 border-amber-500 text-amber-950 glow-amber'
+              : 'bg-card border-amber-500 text-amber-500 hover:bg-amber-500/20'
+            }
+          `}
+        >
+          <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        </button>
+        
+        {/* Camera (placeholder) */}
+        <button
+          disabled={isDisabled}
+          className={`
+            w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center
+            transition-all touch-feedback ${disabledClass}
+            bg-card border-purple-500 text-purple-500 hover:bg-purple-500/20
+          `}
+        >
+          <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
       </div>
       
-      {/* Autopilot Toggle */}
-      <button
-        onClick={onAutopilotToggle}
-        className={`
-          w-full h-[3.5dvh] max-h-7 min-h-4 rounded border flex items-center justify-center gap-1
-          text-[8px] sm:text-[10px] font-bold racing-text transition-all touch-feedback
-          ${isAutopilotOn
-            ? 'bg-primary border-primary text-primary-foreground glow-teal'
-            : 'bg-card border-primary/50 text-primary hover:bg-primary/20 hover:border-primary'
-          }
-        `}
-      >
-        <Navigation className="w-3 h-3 sm:w-4 sm:h-4" />
-        AUTOPILOT {isAutopilotOn ? 'ON' : 'OFF'}
-      </button>
+      {/* H-Pattern Gear Shifter */}
+      <div className={`flex-1 w-full flex items-center justify-center ${disabledClass}`}>
+        <div className="relative" style={{ width: '120px', height: '120px' }}>
+          {/* SVG H-Pattern Lines */}
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 120 120" fill="none">
+            {/* Vertical lines */}
+            <line x1="20" y1="20" x2="20" y2="100" stroke="hsl(var(--muted-foreground))" strokeWidth="3" strokeLinecap="round" />
+            <line x1="60" y1="20" x2="60" y2="100" stroke="hsl(var(--muted-foreground))" strokeWidth="3" strokeLinecap="round" />
+            <line x1="100" y1="20" x2="100" y2="100" stroke="hsl(var(--muted-foreground))" strokeWidth="3" strokeLinecap="round" />
+            {/* Horizontal crossbar */}
+            <line x1="20" y1="60" x2="100" y2="60" stroke="hsl(var(--muted-foreground))" strokeWidth="3" strokeLinecap="round" />
+          </svg>
+          
+          {/* Gear buttons positioned on the H-pattern */}
+          {GEAR_POSITIONS.map(({ gear, col, row }) => {
+            const isActive = currentGear === gear;
+            const isReverse = gear === "R";
+            const x = col * 40 + 20; // 20, 60, 100
+            const y = row * 80 + 20; // 20 (top), 100 (bottom)
+            
+            return (
+              <button
+                key={gear}
+                onClick={() => !isDisabled && onGearChange(gear)}
+                disabled={isDisabled}
+                className={`
+                  absolute w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 flex items-center justify-center
+                  text-xs sm:text-sm font-bold racing-text transition-all touch-feedback z-10
+                  ${isActive
+                    ? isReverse
+                      ? "bg-destructive border-destructive text-destructive-foreground shadow-lg shadow-destructive/40"
+                      : "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/40"
+                    : "bg-card border-muted-foreground/50 text-foreground hover:border-foreground/70"
+                  }
+                `}
+                style={{
+                  left: `${(x / 120) * 100}%`,
+                  top: `${(y / 120) * 100}%`,
+                  transform: 'translate(-50%, -50%)',
+                }}
+              >
+                {gear}
+              </button>
+            );
+          })}
+        </div>
+      </div>
       
-      {/* Power Controls - Bottom Section */}
-      <div className={`w-full grid grid-cols-2 gap-0.5 mt-auto ${disabledClass}`}>
-        {/* Start Button */}
+      {/* Power Controls - Bottom */}
+      <div className={`w-full grid grid-cols-2 gap-1 mt-auto ${disabledClass}`}>
+        {/* Start */}
         <button
           onClick={() => !isDisabled && onStart()}
           disabled={isDisabled}
           className={`
-            h-[4dvh] max-h-8 min-h-5 rounded-lg border-2 flex items-center justify-center gap-0.5
+            h-[5dvh] max-h-10 min-h-6 rounded-lg border-2 flex items-center justify-center gap-1
             text-[8px] sm:text-[10px] font-bold racing-text transition-all touch-feedback
             ${isStarted
               ? 'bg-green-500 border-green-500 text-green-950 glow-green animate-pulse'
-              : 'bg-card border-green-500/50 text-green-500 hover:bg-green-500/20 hover:border-green-500'
+              : 'bg-card border-primary text-primary hover:bg-primary/20'
             }
           `}
         >
@@ -252,15 +262,15 @@ export const GearShifter = ({
           START
         </button>
         
-        {/* Stop Button - Always enabled */}
+        {/* Stop - Always enabled */}
         <button
           onClick={onStop}
           className={`
-            h-[4dvh] max-h-8 min-h-5 rounded-lg border-2 flex items-center justify-center gap-0.5
+            h-[5dvh] max-h-10 min-h-6 rounded-lg border-2 flex items-center justify-center gap-1
             text-[8px] sm:text-[10px] font-bold racing-text transition-all touch-feedback
             ${!isStarted
               ? 'bg-destructive border-destructive text-destructive-foreground'
-              : 'bg-card border-destructive/50 text-destructive hover:bg-destructive/20 hover:border-destructive'
+              : 'bg-card border-destructive text-destructive hover:bg-destructive/20'
             }
           `}
         >
