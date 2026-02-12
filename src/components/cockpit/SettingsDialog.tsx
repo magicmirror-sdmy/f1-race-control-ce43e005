@@ -240,7 +240,7 @@ export const SettingsDialog = ({ tuning, onTuningChange }: SettingsDialogProps) 
 
       {/* Dialog Overlay */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm">
           <div className="racing-panel bg-card p-3 sm:p-4 w-[90vw] max-w-md max-h-[85vh] border border-primary/30 flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between mb-2 flex-shrink-0">
