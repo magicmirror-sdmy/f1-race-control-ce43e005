@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Settings, X, Minus, Plus, ChevronDown, ChevronRight } from "lucide-react";
 
 export interface TuningConstants {
@@ -238,8 +239,8 @@ export const SettingsDialog = ({ tuning, onTuningChange }: SettingsDialogProps) 
         <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
 
-      {/* Dialog Overlay */}
-      {isOpen && (
+      {/* Dialog Overlay - rendered via portal to escape stacking contexts */}
+      {isOpen && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm">
           <div className="racing-panel bg-card p-3 sm:p-4 w-[90vw] max-w-md max-h-[85vh] border border-primary/30 flex flex-col">
             {/* Header */}
@@ -288,7 +289,8 @@ export const SettingsDialog = ({ tuning, onTuningChange }: SettingsDialogProps) 
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
