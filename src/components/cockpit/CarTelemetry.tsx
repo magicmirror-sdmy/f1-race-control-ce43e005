@@ -69,15 +69,29 @@ export const CarTelemetry = ({
       
       <div className="relative w-[min(22vw,8rem)] mt-0.5">
         {/* Car Body - Top Down View */}
-        <svg viewBox="0 0 100 160" className="w-full h-auto">
+        <svg viewBox="0 0 100 205" className="w-full h-auto">
           {/* Car Shadow */}
           <ellipse cx="50" cy="85" rx="25" ry="60" fill="hsl(var(--primary) / 0.1)" />
           
-          {/* Wheel Spin Animation Definitions */}
+          {/* Tire Tread Pattern Definitions */}
           <defs>
-            <pattern id="tirePattern" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
-              <line x1="0" y1="0" x2="0" y2="4" stroke="hsl(var(--border))" strokeWidth="2" />
-            </pattern>
+            <clipPath id="tireFrontLeft">
+              <rect x="10" y="20" width="12" height="20" rx="2" />
+            </clipPath>
+            <clipPath id="tireFrontRight">
+              <rect x="78" y="20" width="12" height="20" rx="2" />
+            </clipPath>
+            <clipPath id="tireRearLeft">
+              <rect x="8" y="115" width="14" height="28" rx="2" />
+            </clipPath>
+            <clipPath id="tireRearRight">
+              <rect x="78" y="115" width="14" height="28" rx="2" />
+            </clipPath>
+            <linearGradient id="tire3d" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="hsl(var(--foreground) / 0.15)" />
+              <stop offset="40%" stopColor="transparent" />
+              <stop offset="100%" stopColor="hsl(var(--foreground) / 0.1)" />
+            </linearGradient>
           </defs>
           
           {/* Front Wing */}
@@ -85,48 +99,40 @@ export const CarTelemetry = ({
           
           {/* Front Left Tire */}
           <g transform={`rotate(${frontWheelAngle}, 22, 28)`}>
-            <rect
-              x="10"
-              y="20"
-              width="12"
-              height="20"
-              rx="2"
+            <rect x="10" y="20" width="12" height="20" rx="2"
               className={`transition-colors ${throttle ? 'fill-muted' : 'fill-card'}`}
-              stroke="hsl(var(--border))"
-              strokeWidth="1"
-            />
-            {/* Tire spin lines */}
+              stroke="hsl(var(--border))" strokeWidth="1" />
+            {/* 3D highlight */}
+            <rect x="10" y="20" width="12" height="20" rx="2" fill="url(#tire3d)" />
+            {/* Tread pattern */}
             {speed > 0 && (
-              <g className="animate-spin" style={{ 
-                transformOrigin: '16px 30px',
-                animationDuration: `${Math.max(0.1, 1 - speed / 120)}s`
-              }}>
-                <line x1="16" y1="22" x2="16" y2="26" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
-                <line x1="16" y1="34" x2="16" y2="38" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
+              <g clipPath="url(#tireFrontLeft)">
+                <g className={gear === 'R' ? 'animate-tread-reverse' : 'animate-tread'}
+                   style={{ animationDuration: `${Math.max(0.08, 0.6 - speed / 200)}s` }}>
+                  {[-1, 0, 1, 2, 3, 4].map(i => (
+                    <rect key={i} x="12" y={20 + i * 4} width="8" height="2" rx="0.5"
+                      fill="hsl(var(--muted-foreground) / 0.4)" />
+                  ))}
+                </g>
               </g>
             )}
           </g>
           
           {/* Front Right Tire */}
           <g transform={`rotate(${frontWheelAngle}, 78, 28)`}>
-            <rect
-              x="78"
-              y="20"
-              width="12"
-              height="20"
-              rx="2"
+            <rect x="78" y="20" width="12" height="20" rx="2"
               className={`transition-colors ${throttle ? 'fill-muted' : 'fill-card'}`}
-              stroke="hsl(var(--border))"
-              strokeWidth="1"
-            />
-            {/* Tire spin lines */}
+              stroke="hsl(var(--border))" strokeWidth="1" />
+            <rect x="78" y="20" width="12" height="20" rx="2" fill="url(#tire3d)" />
             {speed > 0 && (
-              <g className="animate-spin" style={{ 
-                transformOrigin: '84px 30px',
-                animationDuration: `${Math.max(0.1, 1 - speed / 120)}s`
-              }}>
-                <line x1="84" y1="22" x2="84" y2="26" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
-                <line x1="84" y1="34" x2="84" y2="38" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
+              <g clipPath="url(#tireFrontRight)">
+                <g className={gear === 'R' ? 'animate-tread-reverse' : 'animate-tread'}
+                   style={{ animationDuration: `${Math.max(0.08, 0.6 - speed / 200)}s` }}>
+                  {[-1, 0, 1, 2, 3, 4].map(i => (
+                    <rect key={i} x="80" y={20 + i * 4} width="8" height="2" rx="0.5"
+                      fill="hsl(var(--muted-foreground) / 0.4)" />
+                  ))}
+                </g>
               </g>
             )}
           </g>
@@ -156,54 +162,42 @@ export const CarTelemetry = ({
           
           {/* Rear Left Tire - with heat glow */}
           <g>
-            <rect
-              x="8"
-              y="115"
-              width="14"
-              height="28"
-              rx="2"
+            <rect x="8" y="115" width="14" height="28" rx="2"
               className={`transition-all ${throttle || brake ? 'fill-destructive/80' : 'fill-card'}`}
               stroke={throttle || brake ? "hsl(var(--destructive))" : "hsl(var(--border))"}
               strokeWidth="1"
-              style={{
-                filter: throttle || brake ? 'drop-shadow(0 0 4px hsl(var(--destructive)))' : 'none'
-              }}
-            />
-            {/* Tire spin lines */}
+              style={{ filter: throttle || brake ? 'drop-shadow(0 0 4px hsl(var(--destructive)))' : 'none' }} />
+            <rect x="8" y="115" width="14" height="28" rx="2" fill="url(#tire3d)" />
             {speed > 0 && (
-              <g className="animate-spin" style={{ 
-                transformOrigin: '15px 129px',
-                animationDuration: `${Math.max(0.1, 1 - speed / 120)}s`
-              }}>
-                <line x1="15" y1="118" x2="15" y2="124" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
-                <line x1="15" y1="134" x2="15" y2="140" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
+              <g clipPath="url(#tireRearLeft)">
+                <g className={gear === 'R' ? 'animate-tread-reverse' : 'animate-tread'}
+                   style={{ animationDuration: `${Math.max(0.08, 0.6 - speed / 200)}s` }}>
+                  {[-1, 0, 1, 2, 3, 4, 5, 6].map(i => (
+                    <rect key={i} x="10" y={115 + i * 4} width="10" height="2" rx="0.5"
+                      fill="hsl(var(--muted-foreground) / 0.4)" />
+                  ))}
+                </g>
               </g>
             )}
           </g>
           
           {/* Rear Right Tire - with heat glow */}
           <g>
-            <rect
-              x="78"
-              y="115"
-              width="14"
-              height="28"
-              rx="2"
+            <rect x="78" y="115" width="14" height="28" rx="2"
               className={`transition-all ${throttle || brake ? 'fill-destructive/80' : 'fill-card'}`}
               stroke={throttle || brake ? "hsl(var(--destructive))" : "hsl(var(--border))"}
               strokeWidth="1"
-              style={{
-                filter: throttle || brake ? 'drop-shadow(0 0 4px hsl(var(--destructive)))' : 'none'
-              }}
-            />
-            {/* Tire spin lines */}
+              style={{ filter: throttle || brake ? 'drop-shadow(0 0 4px hsl(var(--destructive)))' : 'none' }} />
+            <rect x="78" y="115" width="14" height="28" rx="2" fill="url(#tire3d)" />
             {speed > 0 && (
-              <g className="animate-spin" style={{ 
-                transformOrigin: '85px 129px',
-                animationDuration: `${Math.max(0.1, 1 - speed / 120)}s`
-              }}>
-                <line x1="85" y1="118" x2="85" y2="124" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
-                <line x1="85" y1="134" x2="85" y2="140" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.5" />
+              <g clipPath="url(#tireRearRight)">
+                <g className={gear === 'R' ? 'animate-tread-reverse' : 'animate-tread'}
+                   style={{ animationDuration: `${Math.max(0.08, 0.6 - speed / 200)}s` }}>
+                  {[-1, 0, 1, 2, 3, 4, 5, 6].map(i => (
+                    <rect key={i} x="80" y={115 + i * 4} width="10" height="2" rx="0.5"
+                      fill="hsl(var(--muted-foreground) / 0.4)" />
+                  ))}
+                </g>
               </g>
             )}
           </g>
@@ -242,6 +236,32 @@ export const CarTelemetry = ({
           {/* Petronas Teal Accents */}
           <line x1="30" y1="45" x2="30" y2="130" stroke="hsl(var(--primary))" strokeWidth="1" opacity="0.6" />
           <line x1="70" y1="45" x2="70" y2="130" stroke="hsl(var(--primary))" strokeWidth="1" opacity="0.6" />
+          
+          {/* Reverse Sonar Obstacle Detection */}
+          {gear === 'R' && (
+            <g>
+              {/* Sonar pulse arcs from rear */}
+              <ellipse cx="50" cy="158" rx="12" ry="6" fill="none" 
+                stroke="hsl(var(--warning))" strokeWidth="1.5" className="animate-sonar-1" style={{ transformOrigin: '50px 158px' }} />
+              <ellipse cx="50" cy="158" rx="12" ry="6" fill="none" 
+                stroke="hsl(var(--warning))" strokeWidth="1.2" className="animate-sonar-2" style={{ transformOrigin: '50px 158px' }} />
+              <ellipse cx="50" cy="158" rx="12" ry="6" fill="none" 
+                stroke="hsl(var(--warning))" strokeWidth="0.8" className="animate-sonar-3" style={{ transformOrigin: '50px 158px' }} />
+              
+              {/* Obstacle block */}
+              <rect x="30" y="185" width="40" height="6" rx="1" 
+                fill="hsl(var(--destructive) / 0.6)" stroke="hsl(var(--destructive))" strokeWidth="0.8" className="animate-pulse" />
+              
+              {/* Distance lines */}
+              <line x1="35" y1="170" x2="65" y2="170" stroke="hsl(var(--warning) / 0.3)" strokeWidth="0.5" strokeDasharray="2 2" />
+              <line x1="32" y1="178" x2="68" y2="178" stroke="hsl(var(--warning) / 0.2)" strokeWidth="0.5" strokeDasharray="2 2" />
+              
+              {/* Warning text */}
+              <text x="50" y="198" textAnchor="middle" fill="hsl(var(--destructive))" fontSize="5" fontWeight="bold" className="animate-pulse">
+                OBSTACLE
+              </text>
+            </g>
+          )}
         </svg>
         
         {/* Round Action Buttons */}
