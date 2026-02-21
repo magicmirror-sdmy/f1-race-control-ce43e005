@@ -9,6 +9,7 @@ import { ImmersiveHUD } from "./ImmersiveHUD";
 import { SensorStatus } from "./ServiceIndicator";
 import { AutopilotStatus } from "./AutopilotTelemetry";
 import { TuningConstants, DEFAULT_TUNING } from "./SettingsDialog";
+import { OnboardingScreen } from "./OnboardingScreen";
 
 interface ControlState {
   steeringAngle: number;
@@ -19,6 +20,14 @@ interface ControlState {
 }
 
 export const CockpitController = () => {
+  const [driverName, setDriverName] = useState<string | null>(null);
+  const [driverAge, setDriverAge] = useState<number | null>(null);
+
+  const handleOnboardingComplete = useCallback((name: string, age: number) => {
+    setDriverName(name);
+    setDriverAge(age);
+  }, []);
+
   const [controlState, setControlState] = useState<ControlState>({
     steeringAngle: 0,
     throttle: false,
@@ -250,6 +259,13 @@ export const CockpitController = () => {
     sendCommand("power", "stop");
   }, [sendCommand]);
  
+  if (!driverName || driverAge === null) {
+    return <OnboardingScreen onComplete={handleOnboardingComplete} />;
+  }
+
+  // Generate driver number from age
+  const driverNumber = driverAge;
+
   return (
     <div className="h-[100dvh] w-full flex flex-col overflow-hidden">
        {/* Immersive HUD Overlay */}
@@ -272,6 +288,8 @@ export const CockpitController = () => {
        
       {/* Header */}
       <Header 
+        driverName={driverName}
+        driverNumber={driverNumber}
         isConnected={isConnected}
         onConnect={handleConnect}
         onDisconnect={handleDisconnect}
