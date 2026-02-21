@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Rocket, RotateCcw } from "lucide-react";
 import { Speedometer } from "./Speedometer";
+import { BatteryGauge } from "./BatteryGauge";
 import { ServiceIndicator, SensorStatus } from "./ServiceIndicator";
 
 interface CarTelemetryProps {
@@ -9,6 +10,7 @@ interface CarTelemetryProps {
   brake: boolean;
   gear: string;
   speed: number;
+  batteryLevel?: number;
   onLaunch: () => void;
   onDonut: () => void;
   sensorStatuses?: SensorStatus[];
@@ -30,6 +32,7 @@ export const CarTelemetry = ({
   brake,
   gear,
   speed,
+  batteryLevel = 75,
   onLaunch,
   onDonut,
   sensorStatuses = defaultSensorStatuses,
@@ -55,11 +58,12 @@ export const CarTelemetry = ({
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-0.5 overflow-hidden">
-      {/* Speedometer with Service Indicator */}
-      <div className="relative">
+      {/* Speedometer + Battery Gauge */}
+      <div className="relative flex items-center gap-1.5">
+        <BatteryGauge level={batteryLevel} />
         <Speedometer speed={speed} maxSpeed={100} />
         {/* Service indicator positioned to the right of speedometer */}
-        <div className="absolute -right-7 sm:-right-9 top-1/2 -translate-y-1/2">
+        <div className="ml-0.5">
           <ServiceIndicator 
             sensors={sensorStatuses} 
             requiresService={requiresService} 
