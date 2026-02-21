@@ -3,6 +3,7 @@ import { SettingsDialog, TuningConstants } from "./SettingsDialog";
 
 interface HeaderProps {
   driverName?: string;
+  driverNumber?: number;
   position?: string;
   isConnected: boolean;
   onConnect: (ip: string) => void;
@@ -12,7 +13,8 @@ interface HeaderProps {
 }
 
 export const Header = ({ 
-  driverName = "HAMILTON", 
+  driverName = "DRIVER", 
+  driverNumber = 0,
   position = "P1",
   isConnected,
   onConnect,
@@ -53,7 +55,7 @@ export const Header = ({
         </div>
         {/* Driver Number Badge */}
         <div className="w-4 h-4 sm:w-6 sm:h-6 bg-primary rounded flex items-center justify-center">
-          <span className="text-primary-foreground font-bold text-[8px] sm:text-xs">44</span>
+          <span className="text-primary-foreground font-bold text-[8px] sm:text-xs">{driverNumber}</span>
         </div>
         {/* Settings Dialog */}
         <SettingsDialog tuning={tuning} onTuningChange={onTuningChange} />
