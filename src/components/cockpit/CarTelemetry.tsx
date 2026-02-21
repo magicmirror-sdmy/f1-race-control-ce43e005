@@ -4,6 +4,7 @@ import { Speedometer } from "./Speedometer";
 import { BatteryGauge } from "./BatteryGauge";
 import { ServiceIndicator, SensorStatus } from "./ServiceIndicator";
 import { AccelerometerHUD } from "./AccelerometerHUD";
+import { SonarHUD } from "./SonarHUD";
 
 interface CarTelemetryProps {
   steeringAngle: number;
@@ -59,6 +60,8 @@ export const CarTelemetry = ({
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-0.5 overflow-hidden">
+      {/* Sonar Distance HUD */}
+      <SonarHUD className="mb-0.5" />
       {/* MPU6050 Accelerometer HUD */}
       <AccelerometerHUD className="mb-0.5" />
       

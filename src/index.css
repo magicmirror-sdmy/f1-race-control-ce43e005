@@ -218,12 +218,12 @@
   /* Realistic Tire Tread Scroll */
   @keyframes tread-scroll {
     0% { transform: translateY(0); }
-    100% { transform: translateY(8px); }
+    100% { transform: translateY(-8px); }
   }
   
   @keyframes tread-scroll-reverse {
     0% { transform: translateY(0); }
-    100% { transform: translateY(-8px); }
+    100% { transform: translateY(8px); }
   }
   
   .animate-tread {
