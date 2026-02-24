@@ -63,8 +63,6 @@ export const CarTelemetry = ({
     <div className="flex flex-col items-center justify-center h-full p-0.5 overflow-hidden">
       {/* Now Playing Music HUD */}
       <NowPlayingHUD className="mb-0.5" />
-      {/* Sonar Distance HUD */}
-      <SonarHUD className="mb-0.5" />
       {/* MPU6050 Accelerometer HUD */}
       <AccelerometerHUD className="mb-0.5" />
       
