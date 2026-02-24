@@ -1,5 +1,6 @@
 import { OctagonX, Zap, Play, Square, Eye, Radio, Navigation, Camera } from "lucide-react";
 import { AutopilotTelemetry, AutopilotStatus } from "./AutopilotTelemetry";
+import { NowPlayingHUD } from "./NowPlayingHUD";
 
 interface GearShifterProps {
   currentGear: string;
@@ -238,8 +239,11 @@ export const GearShifter = ({
         </div>
       </div>
       
+      {/* Now Playing Music HUD */}
+      <NowPlayingHUD className="w-full" />
+      
       {/* Power Controls - Bottom */}
-      <div className={`w-full grid grid-cols-2 gap-1 mt-auto ${disabledClass}`}>
+      <div className={`w-full grid grid-cols-2 gap-1 ${disabledClass}`}>
         {/* Start */}
         <button
           onClick={() => !isDisabled && onStart()}
