@@ -10,6 +10,9 @@ import { SensorStatus } from "./ServiceIndicator";
 import { AutopilotStatus } from "./AutopilotTelemetry";
 import { TuningConstants, DEFAULT_TUNING } from "./SettingsDialog";
 import { OnboardingScreen } from "./OnboardingScreen";
+import { DeviceSelectionScreen } from "./DeviceSelectionScreen";
+
+type InputMode = "console" | "device" | null;
 
 interface ControlState {
   steeringAngle: number;
@@ -20,6 +23,7 @@ interface ControlState {
 }
 
 export const CockpitController = () => {
+  const [inputMode, setInputMode] = useState<InputMode>(null);
   const [driverName, setDriverName] = useState<string | null>(null);
   const [driverAge, setDriverAge] = useState<number | null>(null);
 
@@ -27,6 +31,8 @@ export const CockpitController = () => {
     setDriverName(name);
     setDriverAge(age);
   }, []);
+
+  const isViewOnly = inputMode === "console";
 
   const [controlState, setControlState] = useState<ControlState>({
     steeringAngle: 0,
@@ -259,6 +265,10 @@ export const CockpitController = () => {
     sendCommand("power", "stop");
   }, [sendCommand]);
  
+  if (!inputMode) {
+    return <DeviceSelectionScreen onSelect={setInputMode} />;
+  }
+
   if (!driverName || driverAge === null) {
     return <OnboardingScreen onComplete={handleOnboardingComplete} />;
   }
@@ -306,13 +316,13 @@ export const CockpitController = () => {
              <CameraFeed isConnected={isConnected} onTap={handleOpenImmersive} />
           </div>
           
-          {/* Steering Wheel - Bottom */}
-          <div className="flex-1 min-h-0 overflow-hidden">
-            <SteeringWheel 
-              angle={controlState.steeringAngle} 
-              onAngleChange={handleAngleChange} 
-            />
-          </div>
+           {/* Steering Wheel - Bottom */}
+           <div className={`flex-1 min-h-0 overflow-hidden ${isViewOnly ? 'pointer-events-none' : ''}`}>
+             <SteeringWheel 
+               angle={controlState.steeringAngle} 
+               onAngleChange={handleAngleChange} 
+             />
+           </div>
         </div>
         
         {/* Center Zone: Car Telemetry */}
@@ -331,7 +341,7 @@ export const CockpitController = () => {
         </div>
         
         {/* Right Zone: Gear Shifter / Autopilot Telemetry */}
-        <div className="flex-[0.25] border-l border-border/30 racing-panel m-0.5 overflow-hidden">
+        <div className={`flex-[0.25] border-l border-border/30 racing-panel m-0.5 overflow-hidden ${isViewOnly ? 'pointer-events-none' : ''}`}>
           <GearShifter 
             currentGear={controlState.gear} 
             onGearChange={handleGearChange} 
@@ -356,7 +366,7 @@ export const CockpitController = () => {
       </div>
       
       {/* Footer Zone: Pedals */}
-      <div className="h-[12dvh] min-h-12 max-h-20 border-t border-primary/30 flex-shrink-0">
+      <div className={`h-[12dvh] min-h-12 max-h-20 border-t border-primary/30 flex-shrink-0 ${isViewOnly ? 'pointer-events-none opacity-50' : ''}`}>
         <Pedals 
           onThrottleChange={handleThrottleChange}
           onBrakeChange={handleBrakeChange}
