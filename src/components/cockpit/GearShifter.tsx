@@ -1,6 +1,8 @@
-import { OctagonX, Zap, Play, Square, Eye, Radio, Navigation, Camera } from "lucide-react";
+import { useState } from "react";
+import { OctagonX, Zap, Play, Square, Eye, Radio, Navigation, Camera, Crosshair } from "lucide-react";
 import { AutopilotTelemetry, AutopilotStatus } from "./AutopilotTelemetry";
 import { NowPlayingHUD } from "./NowPlayingHUD";
+import { PursuitMode } from "./PursuitMode";
 
 interface GearShifterProps {
   currentGear: string;
@@ -52,6 +54,7 @@ export const GearShifter = ({
   autopilotAcceleration = 0,
   autopilotDistance = 100,
 }: GearShifterProps) => {
+  const [isPursuitOpen, setIsPursuitOpen] = useState(false);
   const isDisabled = isAutopilotOn;
   const disabledClass = isDisabled ? "opacity-40 pointer-events-none" : "";
 
@@ -132,6 +135,9 @@ export const GearShifter = ({
         </button>
       </div>
       
+      {/* Pursuit Mode Dialog */}
+      <PursuitMode isOpen={isPursuitOpen} onClose={() => setIsPursuitOpen(false)} />
+      
       {/* Circular Sensor Toggles Row */}
       <div className={`w-full flex items-center justify-center gap-1.5 sm:gap-2 py-0.5 ${disabledClass}`}>
         {/* Autopilot */}
@@ -147,6 +153,14 @@ export const GearShifter = ({
           `}
         >
           <Navigation className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        </button>
+        
+        {/* Pursuit */}
+        <button
+          onClick={() => setIsPursuitOpen(true)}
+          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center transition-all touch-feedback bg-card/80 border-destructive/30 text-destructive/70 hover:bg-destructive/10 hover:border-destructive/60 hover:text-destructive"
+        >
+          <Crosshair className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
         
         {/* Sonar */}
