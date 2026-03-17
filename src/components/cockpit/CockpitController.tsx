@@ -131,6 +131,11 @@ export const CockpitController = () => {
           newSpeed = Math.max(0, prev.speed - 0.5);
         }
 
+        // Update heading based on steering when moving
+        if (newSpeed > 0 && prev.steeringAngle !== 0) {
+          setHeading(h => (h + prev.steeringAngle * 0.02 * newSpeed * 0.1) % 360);
+        }
+
         return { ...prev, speed: Math.max(0, newSpeed) };
       });
     }, 100);
