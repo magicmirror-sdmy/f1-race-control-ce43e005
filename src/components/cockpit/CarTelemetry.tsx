@@ -3,7 +3,7 @@ import { Rocket, RotateCcw } from "lucide-react";
 import { Speedometer } from "./Speedometer";
 import { BatteryGauge } from "./BatteryGauge";
 import { ServiceIndicator, SensorStatus } from "./ServiceIndicator";
-import { AccelerometerHUD } from "./AccelerometerHUD";
+import { CompassHUD } from "./CompassHUD";
 import { SonarHUD } from "./SonarHUD";
 import { NowPlayingHUD } from "./NowPlayingHUD";
 
