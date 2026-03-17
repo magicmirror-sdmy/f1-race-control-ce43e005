@@ -9,6 +9,7 @@ import { NowPlayingHUD } from "./NowPlayingHUD";
 
 interface CarTelemetryProps {
   steeringAngle: number;
+  heading: number;
   throttle: boolean;
   brake: boolean;
   gear: string;
