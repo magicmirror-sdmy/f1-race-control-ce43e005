@@ -32,6 +32,7 @@ const defaultSensorStatuses: SensorStatus[] = [
 
 export const CarTelemetry = ({
   steeringAngle,
+  heading,
   throttle,
   brake,
   gear,

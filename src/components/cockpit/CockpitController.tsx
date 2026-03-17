@@ -330,6 +330,7 @@ export const CockpitController = () => {
         <div className="flex-[0.4] racing-panel m-0.5 overflow-hidden">
           <CarTelemetry 
             steeringAngle={controlState.steeringAngle}
+            heading={heading}
             throttle={controlState.throttle}
             brake={controlState.brake}
             gear={controlState.gear}
