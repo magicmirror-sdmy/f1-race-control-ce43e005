@@ -45,6 +45,7 @@ export const CockpitController = () => {
   const [serverIp, setServerIp] = useState("");
   const speedIntervalRef = useRef<number | null>(null);
   const [isAutoMode, setIsAutoMode] = useState(false);
+  const [heading, setHeading] = useState(0);
   const [isEmergencyStop, setIsEmergencyStop] = useState(false);
   const [isImmersiveMode, setIsImmersiveMode] = useState(false);
   const [isInfraredOn, setIsInfraredOn] = useState(false);
