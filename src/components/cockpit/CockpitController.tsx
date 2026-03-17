@@ -45,6 +45,7 @@ export const CockpitController = () => {
   const [serverIp, setServerIp] = useState("");
   const speedIntervalRef = useRef<number | null>(null);
   const [isAutoMode, setIsAutoMode] = useState(false);
+  const [heading, setHeading] = useState(0);
   const [isEmergencyStop, setIsEmergencyStop] = useState(false);
   const [isImmersiveMode, setIsImmersiveMode] = useState(false);
   const [isInfraredOn, setIsInfraredOn] = useState(false);
@@ -128,6 +129,11 @@ export const CockpitController = () => {
         } else {
           // Natural deceleration
           newSpeed = Math.max(0, prev.speed - 0.5);
+        }
+
+        // Update heading based on steering when moving
+        if (newSpeed > 0 && prev.steeringAngle !== 0) {
+          setHeading(h => (h + prev.steeringAngle * 0.02 * newSpeed * 0.1) % 360);
         }
 
         return { ...prev, speed: Math.max(0, newSpeed) };
@@ -329,6 +335,7 @@ export const CockpitController = () => {
         <div className="flex-[0.4] racing-panel m-0.5 overflow-hidden">
           <CarTelemetry 
             steeringAngle={controlState.steeringAngle}
+            heading={heading}
             throttle={controlState.throttle}
             brake={controlState.brake}
             gear={controlState.gear}
