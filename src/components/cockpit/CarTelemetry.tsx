@@ -62,9 +62,8 @@ export const CarTelemetry = ({
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-0.5 overflow-hidden">
-      {/* MPU6050 Accelerometer HUD */}
-      {/* MPU6050 Accelerometer HUD */}
-      <AccelerometerHUD className="mb-0.5" />
+      {/* Compass HUD */}
+      <CompassHUD heading={heading} className="mb-0.5" />
       
       {/* Speedometer + Battery Gauge */}
       <div className="relative flex items-center gap-1.5">
