@@ -1,44 +1,57 @@
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { buildMockDebugData, DebugSample, FIELD_GROUPS } from "@/lib/mockDebugData";
+import { buildMockDebugData, DebugSample } from "@/lib/mockDebugData";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  ArrowLeft, Download, Image, FileText, Filter, Clock,
-  Activity, Zap, AlertTriangle, ChevronDown, ChevronRight,
-  Pause, Play, Search, X
+  ArrowLeft, Download, FileText, Clock, Activity, Pause, Play, Search, X, Image
 } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, BarChart, Bar, ScatterChart, Scatter, ZAxis,
+  Cell, ReferenceLine
+} from "recharts";
 
 const ALL_DATA = buildMockDebugData(1);
 
-const STATE_COLORS: Record<string, string> = {
-  IDLE: "text-primary",
-  SLOW: "text-accent",
-  CRAWL: "text-yellow-400",
-  STOP: "text-destructive",
-  AVOID: "text-purple-400",
+const C = {
+  teal: "hsl(177,100%,40%)",
+  red: "hsl(345,100%,55%)",
+  orange: "hsl(30,100%,55%)",
+  green: "hsl(142,76%,46%)",
+  purple: "hsl(260,80%,60%)",
+  blue: "hsl(200,80%,55%)",
+  yellow: "hsl(48,100%,55%)",
+  pink: "hsl(320,80%,60%)",
+  grid: "hsl(200,20%,12%)",
+  axis: "hsl(200,10%,35%)",
+  axisText: "hsl(200,10%,50%)",
 };
 
-const CHART_COLORS = [
-  "hsl(177, 100%, 40%)",
-  "hsl(345, 100%, 55%)",
-  "hsl(30, 100%, 55%)",
-  "hsl(142, 76%, 46%)",
-  "hsl(260, 80%, 60%)",
-  "hsl(200, 80%, 55%)",
-];
+const tooltipStyle = {
+  contentStyle: {
+    backgroundColor: "hsl(200,30%,6%)",
+    border: "1px solid hsl(177,100%,25%)",
+    borderRadius: "3px",
+    fontSize: "9px",
+    fontFamily: "monospace",
+    padding: "4px 6px",
+  },
+  labelStyle: { color: "hsl(180,5%,85%)", fontSize: "9px" },
+};
+
+const tickStyle = { fontSize: 8, fill: C.axisText };
 
 type TimeRange = "all" | "0-10" | "10-18" | "18-22" | "22-25" | "25-28" | "28-30";
 
 const TIME_RANGES: { label: string; value: TimeRange }[] = [
-  { label: "ALL (0-30s)", value: "all" },
-  { label: "IDLE (0-10s)", value: "0-10" },
-  { label: "SLOW (10-18s)", value: "10-18" },
-  { label: "CRAWL (18-22s)", value: "18-22" },
-  { label: "STOP (22-25s)", value: "22-25" },
-  { label: "AVOID (25-28s)", value: "25-28" },
-  { label: "RESUME (28-30s)", value: "28-30" },
+  { label: "ALL", value: "all" },
+  { label: "IDLE 0-10s", value: "0-10" },
+  { label: "SLOW 10-18s", value: "10-18" },
+  { label: "CRAWL 18-22s", value: "18-22" },
+  { label: "STOP 22-25s", value: "22-25" },
+  { label: "AVOID 25-28s", value: "25-28" },
+  { label: "RESUME 28-30s", value: "28-30" },
 ];
 
 function filterByRange(data: DebugSample[], range: TimeRange): DebugSample[] {
@@ -50,403 +63,440 @@ function filterByRange(data: DebugSample[], range: TimeRange): DebugSample[] {
 function exportCSV(data: DebugSample[]) {
   if (!data.length) return;
   const keys = Object.keys(data[0]) as (keyof DebugSample)[];
-  const header = keys.join(",");
-  const rows = data.map(row => keys.map(k => row[k]).join(","));
-  const csv = [header, ...rows].join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
+  const csv = [keys.join(","), ...data.map(r => keys.map(k => r[k]).join(","))].join("\n");
   const a = document.createElement("a");
-  a.href = url;
-  a.download = `debug_log_${new Date().toISOString().slice(0, 19)}.csv`;
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+  a.download = `debug_${Date.now()}.csv`;
   a.click();
-  URL.revokeObjectURL(url);
 }
 
-function exportPNG(el: HTMLElement | null) {
-  if (!el) return;
-  // Simple canvas fallback
-  const canvas = document.createElement("canvas");
-  const rect = el.getBoundingClientRect();
-  canvas.width = rect.width * 2;
-  canvas.height = rect.height * 2;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-  ctx.scale(2, 2);
-  ctx.fillStyle = "#0a1a1f";
-  ctx.fillRect(0, 0, rect.width, rect.height);
-  ctx.fillStyle = "#e8e8e8";
-  ctx.font = "11px monospace";
-  const text = "Debug Log Export - Use CSV for full data";
-  ctx.fillText(text, 20, 30);
-  canvas.toBlob(blob => {
-    if (!blob) return;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `debug_snapshot_${new Date().toISOString().slice(0, 19)}.png`;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
+function exportJSON(data: DebugSample[]) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+  a.download = `debug_${Date.now()}.json`;
+  a.click();
 }
+
+// Panel wrapper
+const Panel = ({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) => (
+  <div className={`bg-card/50 border border-border/20 rounded overflow-hidden flex flex-col ${className}`}>
+    <div className="px-2 py-1 border-b border-border/20 flex-shrink-0">
+      <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{title}</span>
+    </div>
+    <div className="flex-1 min-h-0 p-1">
+      {children}
+    </div>
+  </div>
+);
+
+// Mode flags heatmap row
+const MODE_COLORS: Record<string, string> = {
+  IDLE: "hsl(177,100%,35%)",
+  SLOW: "hsl(48,100%,50%)",
+  CRAWL: "hsl(30,100%,50%)",
+  STOP: "hsl(345,100%,50%)",
+  AVOID: "hsl(260,80%,55%)",
+};
 
 const Debug = () => {
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState<TimeRange>("all");
-  const [selectedFields, setSelectedFields] = useState<(keyof DebugSample)[]>(["current_pwm", "laser_distance_cm", "steer_angle"]);
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(["Control"]);
   const [isPaused, setIsPaused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-  const [showTimeFilter, setShowTimeFilter] = useState(false);
-  const [selectedLogIndex, setSelectedLogIndex] = useState<number | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const filteredData = useMemo(() => filterByRange(ALL_DATA, timeRange), [timeRange]);
-
-  const searchedData = useMemo(() => {
-    if (!searchQuery) return filteredData;
+  const data = useMemo(() => {
+    const filtered = filterByRange(ALL_DATA, timeRange);
+    if (!searchQuery) return filtered;
     const q = searchQuery.toLowerCase();
-    return filteredData.filter(row =>
-      row.obstacle_state.toLowerCase().includes(q) ||
-      row.timestamp.includes(q)
-    );
-  }, [filteredData, searchQuery]);
+    return filtered.filter(r => r.obstacle_state.toLowerCase().includes(q) || r.timestamp.includes(q));
+  }, [timeRange, searchQuery]);
 
-  const toggleGroup = useCallback((group: string) => {
-    setExpandedGroups(prev =>
-      prev.includes(group) ? prev.filter(g => g !== group) : [...prev, group]
-    );
-  }, []);
+  const chartData = useMemo(() => data.map((r, i) => ({ ...r, t: i })), [data]);
 
-  const toggleField = useCallback((field: keyof DebugSample) => {
-    setSelectedFields(prev =>
-      prev.includes(field)
-        ? prev.filter(f => f !== field)
-        : prev.length < 6
-          ? [...prev, field]
-          : prev
-    );
-  }, []);
+  const scatterAccel = useMemo(() => data.map(r => ({
+    x: r.accel_x, y: r.accel_y, z: Math.abs(r.accel_z)
+  })), [data]);
 
-  const chartData = useMemo(() => {
-    return searchedData.map((row, i) => {
-      const point: Record<string, unknown> = { t: i };
-      selectedFields.forEach(f => {
-        const val = row[f];
-        point[f] = typeof val === "number" ? val : 0;
-      });
-      return point;
-    });
-  }, [searchedData, selectedFields]);
-
-  const formatTime = (ts: string) => {
-    const d = new Date(ts);
-    return `${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}`;
-  };
+  const scatterMag = useMemo(() => data.map((r, i) => ({
+    x: r.mag_x, y: r.mag_y, t: i
+  })), [data]);
 
   return (
     <div className="h-[100dvh] w-full flex flex-col bg-background overflow-hidden font-rajdhani">
-      {/* Header Bar */}
-      <div className="h-10 flex items-center justify-between px-3 border-b border-border/40 bg-card/80 flex-shrink-0">
+      {/* Header */}
+      <div className="h-9 flex items-center justify-between px-3 border-b border-border/40 bg-card/80 flex-shrink-0">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate("/")}>
-            <ArrowLeft className="h-4 w-4" />
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => navigate("/")}>
+            <ArrowLeft className="h-3.5 w-3.5" />
           </Button>
-          <div className="flex items-center gap-1.5">
-            <Activity className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold tracking-wider text-foreground uppercase">Debug Console</span>
-          </div>
-          <div className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-primary/20 text-primary border border-primary/30">
-            LIVE
+          <Activity className="h-3.5 w-3.5 text-primary" />
+          <span className="text-xs font-semibold tracking-wider text-foreground uppercase">Debug Log</span>
+          <span className="text-[9px] text-muted-foreground font-mono">[{data.length} samples | ~{data.length}Hz]</span>
+          <div className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest bg-primary/20 text-primary border border-primary/30">
+            {isPaused ? "PAUSED" : "LIVE"}
           </div>
         </div>
-
         <div className="flex items-center gap-1">
-          {/* Search */}
           <div className="relative">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+            <Search className="absolute left-1.5 top-1/2 -translate-y-1/2 h-2.5 w-2.5 text-muted-foreground" />
             <input
-              type="text"
-              placeholder="Filter..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="h-7 w-28 pl-6 pr-6 text-xs bg-secondary/60 border border-border/40 rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60"
+              placeholder="Filter state..."
+              className="h-6 w-24 pl-5 pr-5 text-[10px] bg-secondary/60 border border-border/40 rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 font-mono"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className="absolute right-1.5 top-1/2 -translate-y-1/2">
-                <X className="h-3 w-3 text-muted-foreground" />
+              <button onClick={() => setSearchQuery("")} className="absolute right-1 top-1/2 -translate-y-1/2">
+                <X className="h-2.5 w-2.5 text-muted-foreground" />
               </button>
             )}
           </div>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`h-7 w-7 ${showTimeFilter ? "text-primary" : ""}`}
-            onClick={() => setShowTimeFilter(p => !p)}
-          >
-            <Clock className="h-3.5 w-3.5" />
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsPaused(p => !p)}>
+            {isPaused ? <Play className="h-3 w-3 text-primary" /> : <Pause className="h-3 w-3" />}
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`h-7 w-7 ${showFilters ? "text-primary" : ""}`}
-            onClick={() => setShowFilters(p => !p)}
-          >
-            <Filter className="h-3.5 w-3.5" />
+          <div className="w-px h-4 bg-border/30 mx-0.5" />
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => exportCSV(data)} title="CSV">
+            <FileText className="h-3 w-3" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsPaused(p => !p)}>
-            {isPaused ? <Play className="h-3.5 w-3.5 text-success" /> : <Pause className="h-3.5 w-3.5" />}
-          </Button>
-
-          <div className="w-px h-5 bg-border/40 mx-1" />
-
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => exportCSV(searchedData)} title="Export CSV">
-            <FileText className="h-3.5 w-3.5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => exportPNG(contentRef.current)} title="Export PNG">
-            <Image className="h-3.5 w-3.5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
-            const json = JSON.stringify(searchedData, null, 2);
-            const blob = new Blob([json], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `debug_log_${new Date().toISOString().slice(0, 19)}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-          }} title="Export JSON">
-            <Download className="h-3.5 w-3.5" />
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => exportJSON(data)} title="JSON">
+            <Download className="h-3 w-3" />
           </Button>
         </div>
       </div>
 
-      {/* Time Range Filter Bar */}
-      {showTimeFilter && (
-        <div className="flex items-center gap-1 px-3 py-1.5 border-b border-border/30 bg-secondary/40 flex-shrink-0 overflow-x-auto">
-          <Clock className="h-3 w-3 text-muted-foreground mr-1 flex-shrink-0" />
-          {TIME_RANGES.map(tr => (
-            <button
-              key={tr.value}
-              onClick={() => setTimeRange(tr.value)}
-              className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-colors
-                ${timeRange === tr.value
-                  ? "bg-primary/25 text-primary border border-primary/40"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40 border border-transparent"
-                }`}
-            >
-              {tr.label}
-            </button>
-          ))}
-          <span className="ml-auto text-[10px] text-muted-foreground">{searchedData.length} samples</span>
-        </div>
-      )}
+      {/* Time filter */}
+      <div className="flex items-center gap-1 px-3 py-1 border-b border-border/20 bg-card/40 flex-shrink-0">
+        <Clock className="h-2.5 w-2.5 text-muted-foreground mr-1" />
+        {TIME_RANGES.map(tr => (
+          <button
+            key={tr.value}
+            onClick={() => setTimeRange(tr.value)}
+            className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider transition-colors
+              ${timeRange === tr.value
+                ? "bg-primary/25 text-primary border border-primary/40"
+                : "text-muted-foreground hover:text-foreground border border-transparent"
+              }`}
+          >
+            {tr.label}
+          </button>
+        ))}
+      </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex min-h-0 overflow-hidden" ref={contentRef}>
-        {/* Field Selector Panel */}
-        {showFilters && (
-          <div className="w-48 border-r border-border/30 bg-card/60 flex-shrink-0 overflow-hidden flex flex-col">
-            <div className="px-2 py-1.5 border-b border-border/30">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Fields ({selectedFields.length}/6)</span>
-            </div>
-            <ScrollArea className="flex-1">
-              <div className="p-1.5">
-                {Object.entries(FIELD_GROUPS).map(([group, fields]) => (
-                  <div key={group} className="mb-1">
-                    <button
-                      onClick={() => toggleGroup(group)}
-                      className="flex items-center gap-1 w-full px-1.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {expandedGroups.includes(group) ? (
-                        <ChevronDown className="h-3 w-3" />
-                      ) : (
-                        <ChevronRight className="h-3 w-3" />
-                      )}
-                      {group}
-                    </button>
-                    {expandedGroups.includes(group) && (
-                      <div className="ml-3 space-y-0.5">
-                        {fields.map(field => (
-                          <button
-                            key={field}
-                            onClick={() => toggleField(field)}
-                            className={`block w-full text-left px-1.5 py-0.5 rounded text-[10px] font-mono transition-colors
-                              ${selectedFields.includes(field)
-                                ? "bg-primary/20 text-primary"
-                                : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
-                              }`}
-                          >
-                            {selectedFields.includes(field) && (
-                              <span className="inline-block w-1.5 h-1.5 rounded-full mr-1" style={{
-                                backgroundColor: CHART_COLORS[selectedFields.indexOf(field) % CHART_COLORS.length]
-                              }} />
-                            )}
-                            {field}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
-        )}
-
-        {/* Center Content */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Chart Area */}
-          <div className="h-[35%] min-h-32 border-b border-border/30 p-2 flex-shrink-0">
-            <div className="flex items-center justify-between mb-1">
-              <div className="flex items-center gap-2">
-                <Zap className="h-3 w-3 text-primary" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Telemetry Graph</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {selectedFields.map((f, i) => (
-                  <div key={f} className="flex items-center gap-1">
-                    <span className="w-2 h-0.5 rounded" style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }} />
-                    <span className="text-[9px] font-mono text-muted-foreground">{f}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <ResponsiveContainer width="100%" height="90%">
+      {/* Charts Grid */}
+      <ScrollArea className="flex-1" ref={contentRef}>
+        <div className="p-2 space-y-2">
+          {/* Row 1: Overview - PWM, Gear & Braking */}
+          <Panel title="Drive Overview — Throttle PWM, Gear & Braking">
+            <ResponsiveContainer width="100%" height={140}>
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(200, 20%, 15%)" />
-                <XAxis dataKey="t" tick={{ fontSize: 9, fill: "hsl(200, 10%, 55%)" }} stroke="hsl(180, 30%, 20%)" />
-                <YAxis tick={{ fontSize: 9, fill: "hsl(200, 10%, 55%)" }} stroke="hsl(180, 30%, 20%)" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(200, 30%, 8%)",
-                    border: "1px solid hsl(177, 100%, 31%)",
-                    borderRadius: "4px",
-                    fontSize: "10px",
-                    fontFamily: "monospace",
-                  }}
-                  labelStyle={{ color: "hsl(180, 5%, 95%)" }}
-                />
-                {selectedFields.map((f, i) => (
-                  <Line
-                    key={f}
-                    type="monotone"
-                    dataKey={f}
-                    stroke={CHART_COLORS[i % CHART_COLORS.length]}
-                    strokeWidth={1.5}
-                    dot={false}
-                    isAnimationActive={false}
-                  />
-                ))}
+                <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                <XAxis dataKey="t" tick={tickStyle} stroke={C.axis} label={{ value: "Time (s)", position: "insideBottom", offset: -2, style: { fontSize: 8, fill: C.axisText } }} />
+                <YAxis tick={tickStyle} stroke={C.axis} />
+                <Tooltip {...tooltipStyle} />
+                <Line type="monotone" dataKey="current_pwm" stroke={C.teal} strokeWidth={1.5} dot={false} name="PWM" />
+                <Line type="stepAfter" dataKey="gas_pressed" stroke={C.green} strokeWidth={1} dot={false} name="Gas" />
+                <Line type="stepAfter" dataKey="brake_pressed" stroke={C.red} strokeWidth={1} dot={false} name="Brake" />
+                <Line type="stepAfter" dataKey="is_braking" stroke={C.orange} strokeWidth={1} dot={false} name="Braking" />
               </LineChart>
             </ResponsiveContainer>
+          </Panel>
+
+          {/* Row 2: Steering + Duty Cycles */}
+          <div className="grid grid-cols-2 gap-2">
+            <Panel title="Steering — User Angle">
+              <ResponsiveContainer width="100%" height={120}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                  <XAxis dataKey="t" tick={tickStyle} stroke={C.axis} />
+                  <YAxis tick={tickStyle} stroke={C.axis} />
+                  <Tooltip {...tooltipStyle} />
+                  <ReferenceLine y={0} stroke={C.axis} strokeDasharray="3 3" />
+                  <Line type="monotone" dataKey="steer_angle" stroke={C.teal} strokeWidth={1.5} dot={false} name="Steer" />
+                  <Line type="monotone" dataKey="user_steer_angle" stroke={C.orange} strokeWidth={1} dot={false} name="User Steer" />
+                </LineChart>
+              </ResponsiveContainer>
+            </Panel>
+
+            <Panel title="Per-Wheel Duty Cycles">
+              <ResponsiveContainer width="100%" height={120}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                  <XAxis dataKey="t" tick={tickStyle} stroke={C.axis} />
+                  <YAxis tick={tickStyle} stroke={C.axis} />
+                  <Tooltip {...tooltipStyle} />
+                  <Line type="monotone" dataKey="duty_fl" stroke={C.teal} strokeWidth={1} dot={false} name="FL" />
+                  <Line type="monotone" dataKey="duty_fr" stroke={C.green} strokeWidth={1} dot={false} name="FR" />
+                  <Line type="monotone" dataKey="duty_rl" stroke={C.orange} strokeWidth={1} dot={false} name="RL" />
+                  <Line type="monotone" dataKey="duty_rr" stroke={C.red} strokeWidth={1} dot={false} name="RR" />
+                </LineChart>
+              </ResponsiveContainer>
+            </Panel>
           </div>
 
-          {/* Log Table */}
-          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-            <div className="flex items-center gap-2 px-3 py-1 border-b border-border/30 flex-shrink-0">
-              <AlertTriangle className="h-3 w-3 text-accent" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Event Log</span>
-            </div>
-            <ScrollArea className="flex-1">
-              <table className="w-full text-[10px] font-mono">
-                <thead className="sticky top-0 bg-card/95 backdrop-blur z-10">
-                  <tr className="border-b border-border/30">
-                    <th className="text-left px-2 py-1 text-muted-foreground font-semibold">#</th>
-                    <th className="text-left px-2 py-1 text-muted-foreground font-semibold">TIME</th>
-                    <th className="text-left px-2 py-1 text-muted-foreground font-semibold">STATE</th>
-                    <th className="text-right px-2 py-1 text-muted-foreground font-semibold">PWM</th>
-                    <th className="text-right px-2 py-1 text-muted-foreground font-semibold">STEER</th>
-                    <th className="text-right px-2 py-1 text-muted-foreground font-semibold">LASER</th>
-                    <th className="text-right px-2 py-1 text-muted-foreground font-semibold">BATT</th>
-                    <th className="text-right px-2 py-1 text-muted-foreground font-semibold">HDG</th>
-                    <th className="text-center px-2 py-1 text-muted-foreground font-semibold">GAS</th>
-                    <th className="text-center px-2 py-1 text-muted-foreground font-semibold">BRK</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {searchedData.map((row, i) => (
-                    <tr
+          {/* Row 3: Wheel RPM + RPM Drift */}
+          <div className="grid grid-cols-2 gap-2">
+            <Panel title="Wheel RPM — Rear Left & Right">
+              <ResponsiveContainer width="100%" height={120}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                  <XAxis dataKey="t" tick={tickStyle} stroke={C.axis} />
+                  <YAxis tick={tickStyle} stroke={C.axis} />
+                  <Tooltip {...tooltipStyle} />
+                  <Line type="monotone" dataKey="rpm_rear_left" stroke={C.teal} strokeWidth={1.5} dot={false} name="RL" />
+                  <Line type="monotone" dataKey="rpm_rear_right" stroke={C.green} strokeWidth={1.5} dot={false} name="RR" />
+                  <Line type="monotone" dataKey="rpm_front_right" stroke={C.orange} strokeWidth={1} dot={false} name="FR" />
+                </LineChart>
+              </ResponsiveContainer>
+            </Panel>
+
+            <Panel title="RPM Drift (RR − RL)">
+              <ResponsiveContainer width="100%" height={120}>
+                <BarChart data={chartData.map(d => ({ t: d.t, drift: +(d.rpm_rear_right - d.rpm_rear_left).toFixed(2) }))}>
+                  <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                  <XAxis dataKey="t" tick={tickStyle} stroke={C.axis} />
+                  <YAxis tick={tickStyle} stroke={C.axis} />
+                  <Tooltip {...tooltipStyle} />
+                  <ReferenceLine y={0} stroke={C.axis} />
+                  <Bar dataKey="drift" isAnimationActive={false}>
+                    {chartData.map((_, i) => {
+                      const drift = chartData[i].rpm_rear_right - chartData[i].rpm_rear_left;
+                      return <Cell key={i} fill={drift >= 0 ? C.teal : C.red} fillOpacity={0.7} />;
+                    })}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </Panel>
+          </div>
+
+          {/* Row 4: Accelerometer + Gyroscope */}
+          <div className="grid grid-cols-2 gap-2">
+            <Panel title="Accelerometer (g)">
+              <ResponsiveContainer width="100%" height={120}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                  <XAxis dataKey="t" tick={tickStyle} stroke={C.axis} />
+                  <YAxis tick={tickStyle} stroke={C.axis} domain={[-0.1, 1.1]} />
+                  <Tooltip {...tooltipStyle} />
+                  <Line type="monotone" dataKey="accel_x" stroke={C.red} strokeWidth={1} dot={false} name="X" />
+                  <Line type="monotone" dataKey="accel_y" stroke={C.green} strokeWidth={1} dot={false} name="Y" />
+                  <Line type="monotone" dataKey="accel_z" stroke={C.blue} strokeWidth={1} dot={false} name="Z" />
+                </LineChart>
+              </ResponsiveContainer>
+            </Panel>
+
+            <Panel title="Gyroscope (°/s)">
+              <ResponsiveContainer width="100%" height={120}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                  <XAxis dataKey="t" tick={tickStyle} stroke={C.axis} />
+                  <YAxis tick={tickStyle} stroke={C.axis} />
+                  <Tooltip {...tooltipStyle} />
+                  <Line type="monotone" dataKey="gyro_x" stroke={C.red} strokeWidth={1} dot={false} name="X" />
+                  <Line type="monotone" dataKey="gyro_y" stroke={C.green} strokeWidth={1} dot={false} name="Y" />
+                  <Line type="monotone" dataKey="gyro_z" stroke={C.blue} strokeWidth={1} dot={false} name="Z" />
+                </LineChart>
+              </ResponsiveContainer>
+            </Panel>
+          </div>
+
+          {/* Row 5: Magnetometer + IMU Temp */}
+          <div className="grid grid-cols-2 gap-2">
+            <Panel title="Magnetometer (Gauss)">
+              <ResponsiveContainer width="100%" height={120}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                  <XAxis dataKey="t" tick={tickStyle} stroke={C.axis} />
+                  <YAxis tick={tickStyle} stroke={C.axis} />
+                  <Tooltip {...tooltipStyle} />
+                  <Line type="monotone" dataKey="mag_x" stroke={C.red} strokeWidth={1} dot={false} name="X" />
+                  <Line type="monotone" dataKey="mag_y" stroke={C.green} strokeWidth={1} dot={false} name="Y" />
+                  <Line type="monotone" dataKey="mag_z" stroke={C.teal} strokeWidth={1} dot={false} name="Z" />
+                </LineChart>
+              </ResponsiveContainer>
+            </Panel>
+
+            <Panel title="IMU Temperature (°C)">
+              <ResponsiveContainer width="100%" height={120}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                  <XAxis dataKey="t" tick={tickStyle} stroke={C.axis} />
+                  <YAxis tick={tickStyle} stroke={C.axis} domain={["dataMin - 0.5", "dataMax + 0.5"]} />
+                  <Tooltip {...tooltipStyle} />
+                  <Line type="monotone" dataKey="temp_c" stroke={C.yellow} strokeWidth={1.5} dot={false} name="Temp" />
+                </LineChart>
+              </ResponsiveContainer>
+            </Panel>
+          </div>
+
+          {/* Row 6: Compass Heading + PID Correction */}
+          <div className="grid grid-cols-2 gap-2">
+            <Panel title="Compass Heading (°)">
+              <ResponsiveContainer width="100%" height={120}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                  <XAxis dataKey="t" tick={tickStyle} stroke={C.axis} />
+                  <YAxis tick={tickStyle} stroke={C.axis} />
+                  <Tooltip {...tooltipStyle} />
+                  <Line type="monotone" dataKey="compass_heading" stroke={C.teal} strokeWidth={1.5} dot={false} name="Heading" />
+                  <Line type="monotone" dataKey="compass_target_heading" stroke={C.purple} strokeWidth={1} dot={false} strokeDasharray="4 2" name="Target" />
+                </LineChart>
+              </ResponsiveContainer>
+            </Panel>
+
+            <Panel title="Compass PID Correction (%)">
+              <ResponsiveContainer width="100%" height={120}>
+                <BarChart data={chartData.map(d => ({ t: d.t, pid: d.pid_correction, err: d.heading_error_deg }))}>
+                  <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                  <XAxis dataKey="t" tick={tickStyle} stroke={C.axis} />
+                  <YAxis tick={tickStyle} stroke={C.axis} />
+                  <Tooltip {...tooltipStyle} />
+                  <ReferenceLine y={0} stroke={C.axis} />
+                  <Bar dataKey="pid" isAnimationActive={false}>
+                    {chartData.map((d, i) => (
+                      <Cell key={i} fill={d.pid_correction >= 0 ? C.teal : C.orange} fillOpacity={0.8} />
+                    ))}
+                  </Bar>
+                  <Line type="monotone" dataKey="err" stroke={C.yellow} strokeWidth={1} dot={false} name="Error" />
+                </BarChart>
+              </ResponsiveContainer>
+            </Panel>
+          </div>
+
+          {/* Row 7: Laser Distance (full width) */}
+          <Panel title="Laser Distance (cm) — thresholds: 15cm stop / 25 crawl / 40 slow / 60 caution">
+            <ResponsiveContainer width="100%" height={140}>
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                <XAxis dataKey="t" tick={tickStyle} stroke={C.axis} label={{ value: "Time (s)", position: "insideBottom", offset: -2, style: { fontSize: 8, fill: C.axisText } }} />
+                <YAxis tick={tickStyle} stroke={C.axis} />
+                <Tooltip {...tooltipStyle} />
+                <ReferenceLine y={15} stroke={C.red} strokeDasharray="4 2" label={{ value: "STOP", position: "right", style: { fontSize: 7, fill: C.red } }} />
+                <ReferenceLine y={25} stroke={C.orange} strokeDasharray="4 2" label={{ value: "CRAWL", position: "right", style: { fontSize: 7, fill: C.orange } }} />
+                <ReferenceLine y={40} stroke={C.yellow} strokeDasharray="4 2" label={{ value: "SLOW", position: "right", style: { fontSize: 7, fill: C.yellow } }} />
+                <ReferenceLine y={60} stroke={C.green} strokeDasharray="4 2" label={{ value: "CAUTION", position: "right", style: { fontSize: 7, fill: C.green } }} />
+                <Line type="monotone" dataKey="laser_distance_cm" stroke={C.green} strokeWidth={2} dot={false} name="Distance" />
+              </LineChart>
+            </ResponsiveContainer>
+          </Panel>
+
+          {/* Row 8: Battery + Motor Current */}
+          <div className="grid grid-cols-2 gap-2">
+            <Panel title="Battery Voltage (V)">
+              <ResponsiveContainer width="100%" height={120}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                  <XAxis dataKey="t" tick={tickStyle} stroke={C.axis} />
+                  <YAxis tick={tickStyle} stroke={C.axis} domain={["dataMin - 0.05", "dataMax + 0.05"]} />
+                  <Tooltip {...tooltipStyle} />
+                  <Line type="monotone" dataKey="battery_voltage" stroke={C.yellow} strokeWidth={1.5} dot={false} name="Voltage" />
+                </LineChart>
+              </ResponsiveContainer>
+            </Panel>
+
+            <Panel title="Motor Current (A) + Power Limiter Max Duty (%)">
+              <ResponsiveContainer width="100%" height={120}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                  <XAxis dataKey="t" tick={tickStyle} stroke={C.axis} />
+                  <YAxis yAxisId="left" tick={tickStyle} stroke={C.axis} />
+                  <YAxis yAxisId="right" orientation="right" tick={tickStyle} stroke={C.axis} />
+                  <Tooltip {...tooltipStyle} />
+                  <Line yAxisId="left" type="monotone" dataKey="current_amps" stroke={C.orange} strokeWidth={1.5} dot={false} name="Current" />
+                  <Line yAxisId="right" type="monotone" dataKey="power_limiter_max_duty" stroke={C.teal} strokeWidth={1} dot={false} strokeDasharray="3 2" name="Max Duty" />
+                </LineChart>
+              </ResponsiveContainer>
+            </Panel>
+          </div>
+
+          {/* Row 9: Mode Flags Heatmap */}
+          <Panel title="Mode Flags (event lane)">
+            <div className="h-24 flex flex-col justify-center gap-1 px-1">
+              {/* Obstacle State Lane */}
+              <div className="flex items-center gap-1">
+                <span className="text-[8px] font-mono text-muted-foreground w-16 text-right">STATE</span>
+                <div className="flex-1 flex h-5 rounded overflow-hidden">
+                  {data.map((r, i) => (
+                    <div
                       key={i}
-                      onClick={() => setSelectedLogIndex(selectedLogIndex === i ? null : i)}
-                      className={`border-b border-border/10 cursor-pointer transition-colors
-                        ${selectedLogIndex === i ? "bg-primary/10" : "hover:bg-muted/20"}
-                        ${row.obstacle_state === "STOP" ? "bg-destructive/5" : ""}
-                        ${row.obstacle_state === "AVOID" ? "bg-purple-500/5" : ""}
-                      `}
-                    >
-                      <td className="px-2 py-0.5 text-muted-foreground">{i}</td>
-                      <td className="px-2 py-0.5 text-foreground">{formatTime(row.timestamp)}</td>
-                      <td className={`px-2 py-0.5 font-bold ${STATE_COLORS[row.obstacle_state] || "text-foreground"}`}>
-                        {row.obstacle_state}
-                      </td>
-                      <td className="px-2 py-0.5 text-right text-foreground">{row.current_pwm.toFixed(1)}</td>
-                      <td className="px-2 py-0.5 text-right text-foreground">{row.steer_angle.toFixed(1)}°</td>
-                      <td className={`px-2 py-0.5 text-right ${row.laser_distance_cm < 25 ? "text-destructive" : row.laser_distance_cm < 40 ? "text-accent" : "text-foreground"}`}>
-                        {row.laser_distance_cm.toFixed(1)}
-                      </td>
-                      <td className={`px-2 py-0.5 text-right ${row.battery_voltage < 7.3 ? "text-accent" : "text-foreground"}`}>
-                        {row.battery_voltage.toFixed(2)}V
-                      </td>
-                      <td className="px-2 py-0.5 text-right text-foreground">{row.compass_heading.toFixed(1)}°</td>
-                      <td className="px-2 py-0.5 text-center">
-                        <span className={`inline-block w-1.5 h-1.5 rounded-full ${row.gas_pressed ? "bg-primary" : "bg-muted"}`} />
-                      </td>
-                      <td className="px-2 py-0.5 text-center">
-                        <span className={`inline-block w-1.5 h-1.5 rounded-full ${row.brake_pressed ? "bg-destructive" : "bg-muted"}`} />
-                      </td>
-                    </tr>
+                      className="flex-1 min-w-0"
+                      style={{ backgroundColor: MODE_COLORS[r.obstacle_state] || C.grid }}
+                      title={`t=${i}: ${r.obstacle_state}`}
+                    />
                   ))}
-                </tbody>
-              </table>
-            </ScrollArea>
-          </div>
-        </div>
-
-        {/* Detail Panel - shown when a log row is selected */}
-        {selectedLogIndex !== null && searchedData[selectedLogIndex] && (
-          <div className="w-56 border-l border-border/30 bg-card/60 flex-shrink-0 overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between px-2 py-1.5 border-b border-border/30">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Detail #{selectedLogIndex}</span>
-              <button onClick={() => setSelectedLogIndex(null)}>
-                <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-              </button>
-            </div>
-            <ScrollArea className="flex-1">
-              <div className="p-2 space-y-0.5">
-                {Object.entries(searchedData[selectedLogIndex]).map(([key, val]) => (
-                  <div key={key} className="flex justify-between items-baseline gap-2">
-                    <span className="text-[9px] font-mono text-muted-foreground truncate">{key}</span>
-                    <span className="text-[10px] font-mono text-foreground whitespace-nowrap">
-                      {typeof val === "number" ? val.toFixed(4) : String(val)}
-                    </span>
+                </div>
+              </div>
+              {/* Binary flag lanes */}
+              {(["autonomous_mode", "hunter_mode", "emergency_brake_active", "course_correction_active"] as const).map(field => (
+                <div key={field} className="flex items-center gap-1">
+                  <span className="text-[8px] font-mono text-muted-foreground w-16 text-right truncate">{field.replace(/_/g, " ").replace("active", "").trim()}</span>
+                  <div className="flex-1 flex h-3 rounded overflow-hidden">
+                    {data.map((r, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 min-w-0"
+                        style={{ backgroundColor: r[field] ? (field === "emergency_brake_active" ? C.red : C.teal) : C.grid }}
+                        title={`t=${i}: ${r[field]}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {/* Legend */}
+              <div className="flex items-center gap-3 mt-1 px-16">
+                {Object.entries(MODE_COLORS).map(([state, color]) => (
+                  <div key={state} className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: color }} />
+                    <span className="text-[7px] font-mono text-muted-foreground">{state}</span>
                   </div>
                 ))}
               </div>
-            </ScrollArea>
+            </div>
+          </Panel>
+
+          {/* Row 10: Scatter Plots */}
+          <div className="grid grid-cols-2 gap-2">
+            <Panel title="Magnetometer XY — calibration / hard-iron check">
+              <ResponsiveContainer width="100%" height={140}>
+                <ScatterChart>
+                  <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                  <XAxis dataKey="x" tick={tickStyle} stroke={C.axis} name="Mag X" type="number" />
+                  <YAxis dataKey="y" tick={tickStyle} stroke={C.axis} name="Mag Y" type="number" />
+                  <ZAxis dataKey="t" range={[15, 15]} />
+                  <Tooltip {...tooltipStyle} />
+                  <Scatter data={scatterMag} isAnimationActive={false}>
+                    {scatterMag.map((_, i) => (
+                      <Cell key={i} fill={`hsl(${(i / scatterMag.length) * 300}, 80%, 55%)`} />
+                    ))}
+                  </Scatter>
+                </ScatterChart>
+              </ResponsiveContainer>
+            </Panel>
+
+            <Panel title="Accel XY scatter (lateral vs longitudinal)">
+              <ResponsiveContainer width="100%" height={140}>
+                <ScatterChart>
+                  <CartesianGrid strokeDasharray="2 2" stroke={C.grid} />
+                  <XAxis dataKey="x" tick={tickStyle} stroke={C.axis} name="Accel X" type="number" />
+                  <YAxis dataKey="y" tick={tickStyle} stroke={C.axis} name="Accel Y" type="number" />
+                  <ZAxis dataKey="z" range={[10, 30]} />
+                  <Tooltip {...tooltipStyle} />
+                  <Scatter data={scatterAccel} fill={C.teal} fillOpacity={0.6} isAnimationActive={false} />
+                </ScatterChart>
+              </ResponsiveContainer>
+            </Panel>
           </div>
-        )}
-      </div>
+        </div>
+      </ScrollArea>
 
       {/* Status Bar */}
-      <div className="h-6 flex items-center justify-between px-3 border-t border-border/40 bg-card/60 flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <span className="text-[9px] font-mono text-muted-foreground">
-            RANGE: <span className="text-foreground">{timeRange.toUpperCase()}</span>
-          </span>
-          <span className="text-[9px] font-mono text-muted-foreground">
-            SAMPLES: <span className="text-foreground">{searchedData.length}</span>
-          </span>
-          <span className="text-[9px] font-mono text-muted-foreground">
-            FIELDS: <span className="text-primary">{selectedFields.length}</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className={`inline-block w-1.5 h-1.5 rounded-full ${isPaused ? "bg-accent" : "bg-primary animate-pulse"}`} />
-          <span className="text-[9px] font-mono text-muted-foreground">
-            {isPaused ? "PAUSED" : "STREAMING"}
-          </span>
+      <div className="h-5 flex items-center justify-between px-3 border-t border-border/30 bg-card/60 flex-shrink-0">
+        <span className="text-[8px] font-mono text-muted-foreground">
+          RANGE: <span className="text-foreground">{timeRange}</span> · SAMPLES: <span className="text-foreground">{data.length}</span>
+        </span>
+        <div className="flex items-center gap-1.5">
+          <span className={`w-1.5 h-1.5 rounded-full ${isPaused ? "bg-accent" : "bg-primary animate-pulse"}`} />
+          <span className="text-[8px] font-mono text-muted-foreground">{isPaused ? "PAUSED" : "STREAMING"}</span>
         </div>
       </div>
     </div>
