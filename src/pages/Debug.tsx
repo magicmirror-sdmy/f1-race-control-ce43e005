@@ -64,10 +64,6 @@ function exportCSV(data: DebugSample[]) {
 
 function exportPNG(el: HTMLElement | null) {
   if (!el) return;
-  import("html-to-image" as string).catch(() => {
-    // Fallback: use canvas screenshot approach
-    alert("PNG export requires html-to-image package. CSV export is available.");
-  });
   // Simple canvas fallback
   const canvas = document.createElement("canvas");
   const rect = el.getBoundingClientRect();
