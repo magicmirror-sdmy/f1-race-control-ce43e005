@@ -6,6 +6,7 @@ import { ServiceIndicator, SensorStatus } from "./ServiceIndicator";
 import { CompassHUD } from "./CompassHUD";
 import { SonarHUD } from "./SonarHUD";
 import { NowPlayingHUD } from "./NowPlayingHUD";
+import { CarChassisSVG } from "./CarChassisSVG";
 
 interface CarTelemetryProps {
   steeringAngle: number;
