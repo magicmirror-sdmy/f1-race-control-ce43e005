@@ -81,195 +81,212 @@ export const CarTelemetry = ({
       
       <div className="relative w-[min(22vw,8rem)] mt-0.5">
         {/* Car Body - Top Down View */}
-        <svg viewBox="0 0 100 205" className="w-full h-auto">
+        <svg viewBox="0 0 120 180" className="w-full h-auto">
           {/* Car Shadow */}
-          <ellipse cx="50" cy="85" rx="25" ry="60" fill="hsl(var(--primary) / 0.1)" />
+          <ellipse cx="60" cy="90" rx="30" ry="55" fill="hsl(var(--primary) / 0.08)" />
           
-          {/* Tire Tread Pattern Definitions */}
           <defs>
             <clipPath id="tireFrontLeft">
-              <rect x="10" y="20" width="12" height="20" rx="2" />
+              <rect x="6" y="18" width="16" height="24" rx="3" />
             </clipPath>
             <clipPath id="tireFrontRight">
-              <rect x="78" y="20" width="12" height="20" rx="2" />
+              <rect x="98" y="18" width="16" height="24" rx="3" />
             </clipPath>
             <clipPath id="tireRearLeft">
-              <rect x="8" y="115" width="14" height="28" rx="2" />
+              <rect x="6" y="128" width="16" height="24" rx="3" />
             </clipPath>
             <clipPath id="tireRearRight">
-              <rect x="78" y="115" width="14" height="28" rx="2" />
+              <rect x="98" y="128" width="16" height="24" rx="3" />
             </clipPath>
             <linearGradient id="tire3d" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="hsl(var(--foreground) / 0.15)" />
+              <stop offset="0%" stopColor="hsl(var(--foreground) / 0.18)" />
               <stop offset="40%" stopColor="transparent" />
-              <stop offset="100%" stopColor="hsl(var(--foreground) / 0.1)" />
+              <stop offset="100%" stopColor="hsl(var(--foreground) / 0.12)" />
             </linearGradient>
+            <pattern id="chassisHoles" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+              <circle cx="4" cy="4" r="1.2" fill="hsl(var(--background) / 0.3)" />
+            </pattern>
           </defs>
-          
-          {/* Front Wing */}
-          <rect x="15" y="10" width="70" height="8" rx="2" fill="hsl(var(--card))" stroke="hsl(var(--primary) / 0.5)" strokeWidth="0.5" />
-          
-          {/* Front Left Tire */}
-          <g transform={`rotate(${frontWheelAngle}, 22, 28)`}>
-            <rect x="10" y="20" width="12" height="20" rx="2"
+
+          {/* ===== FRONT LEFT TIRE with steering ===== */}
+          <g transform={`rotate(${frontWheelAngle}, 14, 30)`}>
+            <rect x="6" y="18" width="16" height="24" rx="3" fill="hsl(0 65% 42%)" stroke="hsl(0 70% 30%)" strokeWidth="1" />
+            <rect x="7.5" y="19.5" width="13" height="21" rx="2.5"
               className={`transition-colors ${throttle ? 'fill-muted' : 'fill-card'}`}
-              stroke="hsl(var(--border))" strokeWidth="1" />
-            {/* 3D highlight */}
-            <rect x="10" y="20" width="12" height="20" rx="2" fill="url(#tire3d)" />
-            {/* Tread pattern */}
+              stroke="hsl(var(--foreground) / 0.5)" strokeWidth="0.5" />
+            <rect x="7.5" y="19.5" width="13" height="21" rx="2.5" fill="url(#tire3d)" />
+            {[0, 1, 2, 3, 4].map(i => (
+              <line key={i} x1="14" y1="30" x2={14 + Math.cos((i * 72 * Math.PI) / 180) * 5} y2={30 + Math.sin((i * 72 * Math.PI) / 180) * 8} stroke="hsl(0 60% 35%)" strokeWidth="1.2" />
+            ))}
+            <circle cx="14" cy="30" r="2" fill="hsl(var(--foreground) / 0.4)" />
             {speed > 0 && (
               <g clipPath="url(#tireFrontLeft)">
                 <g className={gear === 'R' ? 'animate-tread-reverse' : 'animate-tread'}
                    style={{ animationDuration: `${Math.max(0.08, 0.6 - speed / 200)}s` }}>
-                  {[-1, 0, 1, 2, 3, 4].map(i => (
-                    <rect key={i} x="12" y={20 + i * 4} width="8" height="2" rx="0.5"
-                      fill="hsl(var(--muted-foreground) / 0.4)" />
+                  {[-1, 0, 1, 2, 3, 4, 5].map(i => (
+                    <rect key={i} x="8" y={18 + i * 4} width="12" height="2" rx="0.5"
+                      fill="hsl(var(--muted-foreground) / 0.35)" />
                   ))}
                 </g>
               </g>
             )}
           </g>
-          
-          {/* Front Right Tire */}
-          <g transform={`rotate(${frontWheelAngle}, 78, 28)`}>
-            <rect x="78" y="20" width="12" height="20" rx="2"
+
+          {/* ===== FRONT RIGHT TIRE with steering ===== */}
+          <g transform={`rotate(${frontWheelAngle}, 106, 30)`}>
+            <rect x="98" y="18" width="16" height="24" rx="3" fill="hsl(0 65% 42%)" stroke="hsl(0 70% 30%)" strokeWidth="1" />
+            <rect x="99.5" y="19.5" width="13" height="21" rx="2.5"
               className={`transition-colors ${throttle ? 'fill-muted' : 'fill-card'}`}
-              stroke="hsl(var(--border))" strokeWidth="1" />
-            <rect x="78" y="20" width="12" height="20" rx="2" fill="url(#tire3d)" />
+              stroke="hsl(var(--foreground) / 0.5)" strokeWidth="0.5" />
+            <rect x="99.5" y="19.5" width="13" height="21" rx="2.5" fill="url(#tire3d)" />
+            {[0, 1, 2, 3, 4].map(i => (
+              <line key={i} x1="106" y1="30" x2={106 + Math.cos((i * 72 * Math.PI) / 180) * 5} y2={30 + Math.sin((i * 72 * Math.PI) / 180) * 8} stroke="hsl(0 60% 35%)" strokeWidth="1.2" />
+            ))}
+            <circle cx="106" cy="30" r="2" fill="hsl(var(--foreground) / 0.4)" />
             {speed > 0 && (
               <g clipPath="url(#tireFrontRight)">
                 <g className={gear === 'R' ? 'animate-tread-reverse' : 'animate-tread'}
                    style={{ animationDuration: `${Math.max(0.08, 0.6 - speed / 200)}s` }}>
-                  {[-1, 0, 1, 2, 3, 4].map(i => (
-                    <rect key={i} x="80" y={20 + i * 4} width="8" height="2" rx="0.5"
-                      fill="hsl(var(--muted-foreground) / 0.4)" />
+                  {[-1, 0, 1, 2, 3, 4, 5].map(i => (
+                    <rect key={i} x="100" y={18 + i * 4} width="12" height="2" rx="0.5"
+                      fill="hsl(var(--muted-foreground) / 0.35)" />
                   ))}
                 </g>
               </g>
             )}
           </g>
+
+          {/* ===== FRONT AXLE & SERVO ===== */}
+          <line x1="22" y1="30" x2="98" y2="30" stroke="hsl(var(--foreground) / 0.3)" strokeWidth="1.5" />
+          <rect x="48" y="24" width="24" height="12" rx="1.5" fill="hsl(var(--foreground) / 0.25)" stroke="hsl(var(--foreground) / 0.4)" strokeWidth="0.8" />
+          <text x="60" y="33" textAnchor="middle" fill="hsl(var(--primary))" fontSize="4" fontWeight="bold">SERVO</text>
+
+          {/* ===== CHASSIS PLATE (Anodized Metal Bracket) ===== */}
+          <rect x="24" y="15" width="72" height="140" rx="4" fill="hsl(var(--foreground) / 0.12)" stroke="hsl(var(--foreground) / 0.3)" strokeWidth="1" />
+          <rect x="24" y="15" width="72" height="140" rx="4" fill="url(#chassisHoles)" />
           
-          {/* Nose Cone */}
-          <path d="M40,15 L50,5 L60,15 L55,35 L45,35 Z" fill="hsl(var(--secondary))" stroke="hsl(var(--primary) / 0.3)" strokeWidth="0.5" />
-          
-          {/* Cockpit / Main Body */}
-          <path 
-            d="M30,35 L70,35 L75,70 L78,120 L75,135 L25,135 L22,120 L25,70 Z" 
-            fill="hsl(var(--card))"
-            stroke="hsl(var(--primary) / 0.3)"
-            strokeWidth="1"
-          />
-          
-          {/* Halo */}
-          <ellipse cx="50" cy="55" rx="15" ry="10" fill="none" stroke="hsl(var(--muted-foreground))" strokeWidth="3" />
-          <circle cx="50" cy="60" r="5" fill="hsl(var(--secondary))" />
-          
-          {/* Sidepods */}
-          <rect x="20" y="50" width="10" height="40" rx="2" fill="hsl(var(--secondary))" stroke="hsl(var(--border))" strokeWidth="0.5" />
-          <rect x="70" y="50" width="10" height="40" rx="2" fill="hsl(var(--secondary))" stroke="hsl(var(--border))" strokeWidth="0.5" />
-          
-          {/* Engine Cover */}
-          <rect x="35" y="75" width="30" height="35" rx="3" fill="hsl(var(--muted))" stroke="hsl(var(--border))" strokeWidth="0.5" />
-          <line x1="50" y1="80" x2="50" y2="105" stroke="hsl(var(--primary) / 0.5)" strokeWidth="1" />
-          
-          {/* Rear Left Tire - with heat glow */}
+          {/* Ventilation slots */}
+          {[0, 1, 2, 3].map(i => (
+            <g key={`slot-${i}`}>
+              <rect x="26" y={55 + i * 18} width="14" height="4" rx="1" fill="hsl(var(--background) / 0.4)" />
+              <rect x="80" y={55 + i * 18} width="14" height="4" rx="1" fill="hsl(var(--background) / 0.4)" />
+            </g>
+          ))}
+
+          {/* Cutout windows */}
+          <rect x="35" y="40" width="12" height="18" rx="2" fill="hsl(var(--background) / 0.25)" />
+          <rect x="73" y="40" width="12" height="18" rx="2" fill="hsl(var(--background) / 0.25)" />
+
+          {/* Front bumper */}
+          <rect x="30" y="16" width="60" height="6" rx="2" fill="hsl(var(--foreground) / 0.18)" stroke="hsl(var(--foreground) / 0.25)" strokeWidth="0.5" />
+
+          {/* ===== BRASS STANDOFFS ===== */}
+          {[[32, 22], [88, 22], [32, 145], [88, 145], [32, 80], [88, 80]].map(([cx, cy], i) => (
+            <g key={`standoff-${i}`}>
+              <circle cx={cx} cy={cy} r="2.5" fill="hsl(43 70% 45%)" stroke="hsl(43 60% 35%)" strokeWidth="0.5" />
+              <circle cx={cx} cy={cy} r="1" fill="hsl(43 50% 55%)" />
+            </g>
+          ))}
+
+          {/* ===== ENCODER MOTORS (rear) ===== */}
+          <rect x="26" y="112" width="12" height="30" rx="2" fill="hsl(var(--foreground) / 0.2)" stroke="hsl(var(--foreground) / 0.35)" strokeWidth="0.8" />
+          <circle cx="32" cy="127" r="3" fill="hsl(var(--foreground) / 0.15)" stroke="hsl(var(--foreground) / 0.3)" strokeWidth="0.5" />
+          <rect x="82" y="112" width="12" height="30" rx="2" fill="hsl(var(--foreground) / 0.2)" stroke="hsl(var(--foreground) / 0.35)" strokeWidth="0.8" />
+          <circle cx="88" cy="127" r="3" fill="hsl(var(--foreground) / 0.15)" stroke="hsl(var(--foreground) / 0.3)" strokeWidth="0.5" />
+          <line x1="22" y1="127" x2="26" y2="127" stroke="hsl(var(--foreground) / 0.4)" strokeWidth="2" />
+          <line x1="94" y1="127" x2="98" y2="127" stroke="hsl(var(--foreground) / 0.4)" strokeWidth="2" />
+
+          {/* ===== CONTROLLER BOARD ===== */}
+          <rect x="40" y="68" width="40" height="28" rx="2" fill="hsl(var(--foreground) / 0.15)" stroke="hsl(var(--primary) / 0.4)" strokeWidth="0.8" />
+          <rect x="43" y="71" width="6" height="4" rx="0.5" fill="hsl(var(--primary) / 0.3)" />
+          <rect x="51" y="71" width="8" height="4" rx="0.5" fill="hsl(var(--foreground) / 0.2)" />
+          <circle cx="72" cy="73" r="2" fill="hsl(0 65% 42% / 0.5)" />
+          <rect x="48" y="78" width="16" height="12" rx="1" fill="hsl(var(--foreground) / 0.25)" stroke="hsl(var(--foreground) / 0.35)" strokeWidth="0.5" />
+          <text x="56" y="86" textAnchor="middle" fill="hsl(var(--primary) / 0.7)" fontSize="3.5">MCU</text>
+          {[0, 1, 2, 3, 4].map(i => (
+            <rect key={`pin-${i}`} x={43 + i * 6} y="92" width="3" height="2" rx="0.3" fill="hsl(43 70% 45%)" />
+          ))}
+
+          {/* ===== BATTERY PACK ===== */}
+          <rect x="42" y="100" width="36" height="16" rx="2" fill="hsl(var(--foreground) / 0.1)" stroke="hsl(var(--primary) / 0.3)" strokeWidth="0.8" />
+          <text x="60" y="110" textAnchor="middle" fill="hsl(var(--primary) / 0.5)" fontSize="4">BATT</text>
+
+          {/* ===== REAR AXLE ===== */}
+          <line x1="22" y1="140" x2="98" y2="140" stroke="hsl(var(--foreground) / 0.3)" strokeWidth="1.5" />
+
+          {/* ===== REAR LEFT TIRE (driven) ===== */}
           <g>
-            <rect x="8" y="115" width="14" height="28" rx="2"
+            <rect x="6" y="128" width="16" height="24" rx="3" fill="hsl(0 65% 42%)" stroke="hsl(0 70% 30%)" strokeWidth="1" />
+            <rect x="7.5" y="129.5" width="13" height="21" rx="2.5"
               className={`transition-all ${throttle || brake ? 'fill-destructive/80' : 'fill-card'}`}
-              stroke={throttle || brake ? "hsl(var(--destructive))" : "hsl(var(--border))"}
-              strokeWidth="1"
+              stroke={throttle || brake ? "hsl(var(--destructive))" : "hsl(var(--foreground) / 0.5)"}
+              strokeWidth="0.5"
               style={{ filter: throttle || brake ? 'drop-shadow(0 0 4px hsl(var(--destructive)))' : 'none' }} />
-            <rect x="8" y="115" width="14" height="28" rx="2" fill="url(#tire3d)" />
+            <rect x="7.5" y="129.5" width="13" height="21" rx="2.5" fill="url(#tire3d)" />
+            {[0, 1, 2, 3, 4].map(i => (
+              <line key={i} x1="14" y1="140" x2={14 + Math.cos((i * 72 * Math.PI) / 180) * 5} y2={140 + Math.sin((i * 72 * Math.PI) / 180) * 8} stroke="hsl(0 60% 35%)" strokeWidth="1.2" />
+            ))}
+            <circle cx="14" cy="140" r="2" fill="hsl(var(--foreground) / 0.4)" />
             {speed > 0 && (
               <g clipPath="url(#tireRearLeft)">
                 <g className={gear === 'R' ? 'animate-tread-reverse' : 'animate-tread'}
                    style={{ animationDuration: `${Math.max(0.08, 0.6 - speed / 200)}s` }}>
-                  {[-1, 0, 1, 2, 3, 4, 5, 6].map(i => (
-                    <rect key={i} x="10" y={115 + i * 4} width="10" height="2" rx="0.5"
-                      fill="hsl(var(--muted-foreground) / 0.4)" />
+                  {[-1, 0, 1, 2, 3, 4, 5].map(i => (
+                    <rect key={i} x="8" y={128 + i * 4} width="12" height="2" rx="0.5"
+                      fill="hsl(var(--muted-foreground) / 0.35)" />
                   ))}
                 </g>
               </g>
             )}
           </g>
-          
-          {/* Rear Right Tire - with heat glow */}
+
+          {/* ===== REAR RIGHT TIRE (driven) ===== */}
           <g>
-            <rect x="78" y="115" width="14" height="28" rx="2"
+            <rect x="98" y="128" width="16" height="24" rx="3" fill="hsl(0 65% 42%)" stroke="hsl(0 70% 30%)" strokeWidth="1" />
+            <rect x="99.5" y="129.5" width="13" height="21" rx="2.5"
               className={`transition-all ${throttle || brake ? 'fill-destructive/80' : 'fill-card'}`}
-              stroke={throttle || brake ? "hsl(var(--destructive))" : "hsl(var(--border))"}
-              strokeWidth="1"
+              stroke={throttle || brake ? "hsl(var(--destructive))" : "hsl(var(--foreground) / 0.5)"}
+              strokeWidth="0.5"
               style={{ filter: throttle || brake ? 'drop-shadow(0 0 4px hsl(var(--destructive)))' : 'none' }} />
-            <rect x="78" y="115" width="14" height="28" rx="2" fill="url(#tire3d)" />
+            <rect x="99.5" y="129.5" width="13" height="21" rx="2.5" fill="url(#tire3d)" />
+            {[0, 1, 2, 3, 4].map(i => (
+              <line key={i} x1="106" y1="140" x2={106 + Math.cos((i * 72 * Math.PI) / 180) * 5} y2={140 + Math.sin((i * 72 * Math.PI) / 180) * 8} stroke="hsl(0 60% 35%)" strokeWidth="1.2" />
+            ))}
+            <circle cx="106" cy="140" r="2" fill="hsl(var(--foreground) / 0.4)" />
             {speed > 0 && (
               <g clipPath="url(#tireRearRight)">
                 <g className={gear === 'R' ? 'animate-tread-reverse' : 'animate-tread'}
                    style={{ animationDuration: `${Math.max(0.08, 0.6 - speed / 200)}s` }}>
-                  {[-1, 0, 1, 2, 3, 4, 5, 6].map(i => (
-                    <rect key={i} x="80" y={115 + i * 4} width="10" height="2" rx="0.5"
-                      fill="hsl(var(--muted-foreground) / 0.4)" />
+                  {[-1, 0, 1, 2, 3, 4, 5].map(i => (
+                    <rect key={i} x="100" y={128 + i * 4} width="12" height="2" rx="0.5"
+                      fill="hsl(var(--muted-foreground) / 0.35)" />
                   ))}
                 </g>
               </g>
             )}
           </g>
-          
-          {/* Rear Wing */}
-          <rect x="12" y="148" width="76" height="6" rx="1" fill="hsl(var(--card))" stroke="hsl(var(--primary) / 0.5)" strokeWidth="0.5" />
-          <rect x="20" y="145" width="60" height="3" rx="1" fill="hsl(var(--muted))" />
-          
-          {/* Brake Lights - Center rear */}
-          <rect 
-            x="40" 
-            y="143" 
-            width="20" 
-            height="3" 
-            rx="1" 
+
+          {/* ===== BRAKE LIGHTS ===== */}
+          <rect x="45" y="150" width="30" height="3" rx="1"
             className={`transition-all duration-100 ${brake ? 'fill-destructive' : 'fill-muted'}`}
-            style={{
-              filter: brake ? 'drop-shadow(0 0 6px hsl(var(--destructive))) drop-shadow(0 0 10px hsl(var(--destructive)))' : 'none'
-            }}
+            style={{ filter: brake ? 'drop-shadow(0 0 6px hsl(var(--destructive))) drop-shadow(0 0 10px hsl(var(--destructive)))' : 'none' }}
           />
-          {/* Brake light glow effect */}
           {brake && (
-            <ellipse 
-              cx="50" 
-              cy="144" 
-              rx="15" 
-              ry="8" 
-              fill="hsl(var(--destructive) / 0.3)"
-              className="animate-pulse"
-            />
+            <ellipse cx="60" cy="151" rx="18" ry="6" fill="hsl(var(--destructive) / 0.3)" className="animate-pulse" />
           )}
-          
-          {/* DRS Indicator */}
-          <circle cx="50" cy="150" r="2" className={`transition-colors ${gear === 'S' ? 'fill-primary' : 'fill-muted'}`} />
-          
-          {/* Petronas Teal Accents */}
-          <line x1="30" y1="45" x2="30" y2="130" stroke="hsl(var(--primary))" strokeWidth="1" opacity="0.6" />
-          <line x1="70" y1="45" x2="70" y2="130" stroke="hsl(var(--primary))" strokeWidth="1" opacity="0.6" />
-          
-          {/* Reverse Sonar Obstacle Detection */}
+
+          {/* ===== REVERSE SONAR ===== */}
           {gear === 'R' && (
             <g>
-              {/* Sonar pulse arcs from rear */}
-              <ellipse cx="50" cy="158" rx="12" ry="6" fill="none" 
-                stroke="hsl(var(--warning))" strokeWidth="1.5" className="animate-sonar-1" style={{ transformOrigin: '50px 158px' }} />
-              <ellipse cx="50" cy="158" rx="12" ry="6" fill="none" 
-                stroke="hsl(var(--warning))" strokeWidth="1.2" className="animate-sonar-2" style={{ transformOrigin: '50px 158px' }} />
-              <ellipse cx="50" cy="158" rx="12" ry="6" fill="none" 
-                stroke="hsl(var(--warning))" strokeWidth="0.8" className="animate-sonar-3" style={{ transformOrigin: '50px 158px' }} />
-              
-              {/* Obstacle block */}
-              <rect x="30" y="185" width="40" height="6" rx="1" 
+              <ellipse cx="60" cy="158" rx="14" ry="6" fill="none"
+                stroke="hsl(var(--warning))" strokeWidth="1.5" className="animate-sonar-1" style={{ transformOrigin: '60px 158px' }} />
+              <ellipse cx="60" cy="158" rx="14" ry="6" fill="none"
+                stroke="hsl(var(--warning))" strokeWidth="1.2" className="animate-sonar-2" style={{ transformOrigin: '60px 158px' }} />
+              <ellipse cx="60" cy="158" rx="14" ry="6" fill="none"
+                stroke="hsl(var(--warning))" strokeWidth="0.8" className="animate-sonar-3" style={{ transformOrigin: '60px 158px' }} />
+              <rect x="38" y="172" width="44" height="5" rx="1"
                 fill="hsl(var(--destructive) / 0.6)" stroke="hsl(var(--destructive))" strokeWidth="0.8" className="animate-pulse" />
-              
-              {/* Distance lines */}
-              <line x1="35" y1="170" x2="65" y2="170" stroke="hsl(var(--warning) / 0.3)" strokeWidth="0.5" strokeDasharray="2 2" />
-              <line x1="32" y1="178" x2="68" y2="178" stroke="hsl(var(--warning) / 0.2)" strokeWidth="0.5" strokeDasharray="2 2" />
-              
-              {/* Warning text */}
-              <text x="50" y="198" textAnchor="middle" fill="hsl(var(--destructive))" fontSize="5" fontWeight="bold" className="animate-pulse">
+              <text x="60" y="185" textAnchor="middle" fill="hsl(var(--destructive))" fontSize="5" fontWeight="bold" className="animate-pulse">
                 OBSTACLE
               </text>
             </g>
