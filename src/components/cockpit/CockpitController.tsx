@@ -332,20 +332,25 @@ export const CockpitController = () => {
            </div>
         </div>
         
-        {/* Center Zone: Car Telemetry */}
-        <div className="flex-[0.4] racing-panel m-0.5 overflow-hidden">
-          <CarTelemetry 
-            steeringAngle={controlState.steeringAngle}
-            heading={heading}
-            throttle={controlState.throttle}
-            brake={controlState.brake}
-            gear={controlState.gear}
-            speed={controlState.speed}
-            onLaunch={handleLaunch}
-            onDonut={handleDonut}
-            sensorStatuses={sensorStatuses}
-            requiresService={requiresService}
-          />
+        {/* Center Zone: Car Telemetry + MiniMap */}
+        <div className="flex-[0.4] flex flex-col m-0.5 gap-0.5 overflow-hidden">
+          <div className="flex-[0.55] racing-panel overflow-hidden">
+            <CarTelemetry 
+              steeringAngle={controlState.steeringAngle}
+              heading={heading}
+              throttle={controlState.throttle}
+              brake={controlState.brake}
+              gear={controlState.gear}
+              speed={controlState.speed}
+              onLaunch={handleLaunch}
+              onDonut={handleDonut}
+              sensorStatuses={sensorStatuses}
+              requiresService={requiresService}
+            />
+          </div>
+          <div className="flex-[0.45] racing-panel overflow-hidden">
+            <MiniMap />
+          </div>
         </div>
         
         {/* Right Zone: Gear Shifter / Autopilot Telemetry */}
