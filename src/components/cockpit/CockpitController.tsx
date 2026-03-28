@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { Header } from "./Header";
 import { SteeringWheel } from "./SteeringWheel";
 import { CameraFeed } from "./CameraFeed";
+import { MiniMap } from "./MiniMap";
 import { CarTelemetry } from "./CarTelemetry";
 import { GearShifter } from "./GearShifter";
 import { Pedals } from "./Pedals";
